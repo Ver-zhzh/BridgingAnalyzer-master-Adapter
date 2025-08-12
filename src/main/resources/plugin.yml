@@ -1,0 +1,30 @@
+name: BridgingAnalyzer
+main: sakura.kooi.BridgingAnalyzer.BridgingAnalyzer
+version: 2.0.0
+api-version: 1.13
+authors: [SakuraKooi, Ver_zhzh(1.21)]
+description: Minecraft Bridging Practice for Bedwars - Updated for 1.21 by Ver_zhzh
+website: https://github.com/SakuraKoi/BridgingAnalyzer
+commands:
+  bridge:
+    description: Bridging Analyzer Config
+    usage: /bridge
+  clearblock:
+    description: clear placed block
+    usage: /clearblock
+  imstuck:
+    description: destroy near block
+    usage: /imstuck
+  genvillager:
+    description: create villager spawn point
+    usage: /genvillager
+  bsaveworld:
+    description: save the world
+    usage: /bsaveworld
+permissions:
+  bridginganalyzer.noclear:
+    default: op
+  bridginganalyzer.clear:
+    default: op
+  bridginganalyzer.admin:
+    default: op
