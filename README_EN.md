@@ -1,20 +1,25 @@
-# BridgingAnalyzer - Bridging Practice Plugin
+# BridgingAnalyzer - Bridging Practice
 
 <div align="center">
 
-**Minecraft Bridging Practice Plugin for Bedwars**  
-**专为起床战争设计的搭路练习插件**
+**Minecraft Bridging Practice Plugin for Bedwars**
+**Professional Bridging Practice Plugin Designed for Bedwars**
 
 [![License](https://img.shields.io/github/license/SakuraKoi/BridgingAnalyzer?style=flat-square)](LICENSE)
-[![Downloads](https://img.shields.io/github/downloads/SakuraKoi/BridgingAnalyzer/total?style=flat-square)](https://github.com/SakuraKoi/BridgingAnalyzer/releases)
-[![bStats Players](https://img.shields.io/bstats/players/3991?style=flat-square)](https://bstats.org/plugin/bukkit/BridgingAnalyzer/3991)
-[![bStats Servers](https://img.shields.io/bstats/servers/3991?style=flat-square)](https://bstats.org/plugin/bukkit/BridgingAnalyzer/3991)
-
-[![Minecraft Version](https://img.shields.io/badge/Minecraft-1.21+-brightgreen?style=flat-square)](https://www.spigotmc.org/)
-[![Java Version](https://img.shields.io/badge/Java-21+-orange?style=flat-square)](https://adoptium.net/)
+[![Java](https://img.shields.io/badge/Java-8%2B%20%7C%2021-orange?style=flat-square)](https://adoptium.net/)
+[![Minecraft](https://img.shields.io/badge/Minecraft-1.13--1.21%2B-green?style=flat-square)](https://www.spigotmc.org/)
 [![Maven](https://img.shields.io/badge/Built%20with-Maven-blue?style=flat-square)](https://maven.apache.org/)
 
-**[Original Project](https://github.com/SakuraKoi/BridgingAnalyzer)** | **[Download Latest](https://github.com/Ver-zhzh/BridgingAnalyzer-master-Adapter/releases)** | **[中文文档](README.md)**
+**[Original Project](https://github.com/SakuraKoi/BridgingAnalyzer)** | **[Download Latest](https://github.com/SakuraKoi/BridgingAnalyzer/releases)** | **[中文文档](README.md)**
+
+---
+
+### 🌟 **Project Highlights**
+- 🎯 **Full Version Compatibility** Support for Minecraft 1.13.2 - 1.21+ (8 versions)
+- ⚡ **Smart Adapters** Auto-detect server version and use corresponding adapters
+- 🎨 **Cross-Version API** Unified API interface ensuring consistent functionality
+- 🏗️ **Modern Architecture** Maven multi-version build + Smart Fallback mechanism
+- 🌍 **Complete Coverage** Perfect bridge from legacy API to modern API
 
 </div>
 
@@ -22,7 +27,8 @@
 
 ## 📋 Table of Contents
 
-- [🎉 Version 2.0.0 - Minecraft 1.21 Support](#-version-200---minecraft-121-support)
+- [🎉 Version 2.0.0 - Multi-Version Adapter System](#-version-200---multi-version-adapter-system)
+- [📦 Supported Versions](#-supported-versions)
 - [👥 Contributors](#-contributors)
 - [✨ New Features](#-new-features)
 - [🚀 Quick Start](#-quick-start)
@@ -30,7 +36,8 @@
 - [🔧 Build Instructions](#-build-instructions)
 - [🎮 Features](#-features)
 - [📖 Usage Guide](#-usage-guide)
-- [🔄 Upgrading from Legacy Versions](#-upgrading-from-legacy-versions)
+- [🔄 Upgrading from Old Versions](#-upgrading-from-old-versions)
+- [❓ FAQ](#-faq)
 - [📝 Changelog](#-changelog)
 - [🤝 Contributing](#-contributing)
 - [📄 License](#-license)
@@ -38,33 +45,84 @@
 
 ---
 
-## 🎉 Version 2.0.0 - Minecraft 1.21 Support
+## 🎉 Version 2.0.0 - Multi-Version Adapter System
 
-**Major Update!** BridgingAnalyzer now fully supports **Minecraft 1.21**!
+**Major Update!** BridgingAnalyzer now supports **8 Minecraft versions**!
 
-This is a completely modernized version, fully upgraded from 1.8.9 to 1.21, bringing significant performance improvements, stability enhancements, and user experience optimizations.
+This is a revolutionary multi-version adapter system that achieves complete coverage from 1.13.2 to 1.21+ through intelligent adapter technology, ensuring optimal compatibility and performance for each version.
+
+## 📦 Supported Versions
+
+### ✅ Directly Supported Versions
+| Version | Adapter | Java Version | File Size | Features |
+|---------|---------|--------------|-----------|----------|
+| **1.21+ + 1.8.9 - 1.12.2** | `v1_21_R1` | Java 21 | 119 KB | Latest API, full features |
+| **1.20.4** | `v1_20_R3` | Java 21 | 132 KB | Trails & Tales update |
+| **1.19.2** | `v1_19_R1` | Java 17 | 132 KB | Wild Update features |
+| **1.18.1** | `v1_18_R1` | Java 17 | 132 KB | Caves & Cliffs Part II |
+| **1.16.5** | `v1_16_R3` | Java 8 | 123 KB | Nether Update support |
+| **1.15.2** | `v1_15_R1` | Java 8 | 123 KB | Buzzy Bees update |
+| **1.14.4** | `v1_14_R1` | Java 8 | 117 KB | Village & Pillage |
+| **1.13.2** | `v1_13_R2` | Java 8 | 117 KB | Aquatic Update, modern API start |
+
+### 📥 Download Corresponding Version
+| Server Version | Download File | Description |
+|----------------|---------------|-------------|
+| **1.21+, 1.8.9-1.12.2** | `BridgingAnalyzer-2.0.0.jar` | Latest version, full features |
+| **1.20.4** | `BridgingAnalyzer-2.0.0-1.20.jar` | 1.20 specialized adaptation |
+| **1.19.2** | `BridgingAnalyzer-2.0.0-1.19.jar` | 1.19 specialized adaptation |
+| **1.18.1** | `BridgingAnalyzer-2.0.0-1.18.jar` | 1.18 specialized adaptation |
+| **1.16.5** | `BridgingAnalyzer-2.0.0-1.16.jar` | 1.16 specialized adaptation |
+| **1.15.2** | `BridgingAnalyzer-2.0.0-1.15.jar` | 1.15 specialized adaptation |
+| **1.14.4** | `BridgingAnalyzer-2.0.0-1.14.jar` | 1.14 specialized adaptation |
+| **1.13.2** | `BridgingAnalyzer-2.0.0-1.13.jar` | 1.13 specialized adaptation |
 
 ### 👥 Contributors
 - **Original Author**: SakuraKooi
-- **1.21 Adaptation**: Ver_zhzh
+- **Multi-Version Adaptation**: [Ver_zhzh](https://github.com/Ver-zhzh)
 
 ### ✨ New Features
-- 🚀 **Complete Minecraft 1.21 Support** - Fully upgraded from 1.8.9
-- 🏗️ **Modern Maven Project Structure** - Standardized build and dependency management
-- 🎆 **Modern Particle Effects System** - Using latest Bukkit Particle API
-- ⚡ **Performance Optimizations** - Event handling, permission caching, block clearing optimizations
-- 📺 **Modern Title Display** - Using native Bukkit Title API
-- 🔧 **Removed Reflection Dependencies** - Enhanced stability and compatibility
+- 🚀 **8-Version Full Coverage** - Support for Minecraft 1.13.2 - 1.21+ all modern versions
+- 🏗️ **Smart Adapter System** - Auto-detect version and use corresponding adapters
+- 🎆 **Cross-Version API Unification** - Unified interface ensuring functional consistency
+- ⚡ **Smart Fallback Mechanism** - Unsupported versions automatically use compatible adapters
+- 📺 **Multi-Version Build System** - Maven profiles support one-click build of all versions
+- 🔧 **Zero Configuration Usage** - Download corresponding version and use directly
 
-### 🛠️ Technical Upgrades
-- **Java 21** Support
-- **Spigot 1.21** API
-- **bStats 3.0.2** Latest statistics system
-- **Lombok 1.18.30** Modern code generation
+### 🛠️ Technical Architecture
+- **12 Version Adapters** - Coverage from 1.8.8 to 1.21+ all versions
+- **8 Maven Profiles** - Automated multi-version build
+- **Java 8/21 Dual Support** - Legacy versions use Java 8, 1.21 uses Java 21
+- **Cross-Version Compatibility** - String enum lookup + Try-catch fallback mechanism
 
 ---
 
 ## 🚀 Quick Start
+
+### 📥 Download & Installation
+
+1. **Download Plugin**
+   - Go to [Releases Page](https://github.com/SakuraKoi/BridgingAnalyzer/releases) to download the latest version
+   - Select the appropriate `BridgingAnalyzer-2.1.0-*.jar` file for your server version
+
+2. **Install Plugin**
+   - Place the jar file in your server's `plugins` folder
+   - Ensure your server version matches the downloaded file
+
+3. **Restart Server**
+   - Restart the server to load the plugin
+   - Check console to confirm successful plugin loading
+
+4. **Start Using**
+   - Type `/bridge` in-game to view configuration options
+   - See "One-Minute Experience" below for quick start
+
+### ⚡ One-Minute Experience
+
+1. **Set Practice Area** - Place emerald blocks as teleport points
+2. **Start Bridging** - Step on emerald blocks to set checkpoints
+3. **View Statistics** - Real-time display of bridging speed and CPS
+4. **Teleport Back** - Step on redstone blocks to return to teleport point, lapis blocks to return to spawn
 
 ### 📥 Download & Installation
 
@@ -113,36 +171,53 @@ This project has been completely converted to a **modern Maven project structure
 - **IDE Friendly** - Supports IntelliJ IDEA, Eclipse, and other mainstream IDEs
 
 ### 📋 **Build Requirements**
-- **Java 21+** - Must use Java 21 or higher
+- **Java 8+** - For legacy version builds (1.13-1.20)
+- **Java 21+** - For 1.21 version build
 - **Maven 3.6+** - For project building and dependency management
 - **[Lombok](https://projectlombok.org/)** - For getter/setter code generation, please install Lombok plugin in your IDE
 
 ### 🚀 **Build Steps**
 
 ```bash
-# Clone the 1.21 adaptation project
-git clone https://github.com/Ver-zhzh/BridgingAnalyzer-master-Adapter.git
+# Clone multi-version adapter project
+git clone https://github.com/SakuraKoi/BridgingAnalyzer.git
 
 # Enter project directory
-cd BridgingAnalyzer-master-Adapter
+cd BridgingAnalyzer
 
-# Compile project (first build will automatically download dependencies)
-mvn clean compile
+# Build 1.21 version (default)
+mvn clean package -DskipTests
 
-# Package plugin
-mvn package
+# Build specific versions
+mvn -P legacy-1.20 clean package -DskipTests  # 1.20 version
+mvn -P legacy-1.19 clean package -DskipTests  # 1.19 version
+mvn -P legacy-1.18 clean package -DskipTests  # 1.18 version
+mvn -P legacy-1.16 clean package -DskipTests  # 1.16 version
+mvn -P legacy-1.15 clean package -DskipTests  # 1.15 version
+mvn -P legacy-1.14 clean package -DskipTests  # 1.14 version
+mvn -P legacy-1.13 clean package -DskipTests  # 1.13 version
 
-# Generated jar file located at target/BridgingAnalyzer-2.0.0.jar
+# One-click build all versions (Windows)
+build-all-versions.bat
+
+# Generated jar files located at
+target/BridgingAnalyzer-2.1.0.jar          # 1.21 version
+target/BridgingAnalyzer-2.1.0-1.20.jar     # 1.20 version
+# ... other versions
+releases/                                   # All version release files
 ```
 
-### 📊 **Maven Advantages**
-- **Automatic Dependency Management** - Automatically downloads Spigot API, bStats, Lombok, and other dependencies
-- **Version Control** - Unified management of all dependency versions, avoiding conflicts
-- **Standardized Build** - Follows Maven standards, convenient for CI/CD integration
-- **IDE Integration** - Modern IDEs natively support Maven projects
+### 📊 **Multi-Version Build Advantages**
+- **Smart Adapters** - Auto-detect server version and use corresponding adapters
+- **Unified API Interface** - Cross-version functional consistency guarantee
+- **Automated Build** - Maven profiles support one-click build of all versions
+- **Version Isolation** - Each version uses corresponding Spigot API and Java version
+- **Fallback Mechanism** - Unsupported versions automatically use compatible adapters
 
-### ⚠️ **Important Notice**
-This plugin uses bStats for anonymous usage statistics. Please don't delete the statistics classes when building! Maven will automatically handle bStats dependencies and packaging.
+### ⚠️ **Important Reminders**
+- This plugin uses bStats for anonymous usage statistics, don't delete the statistics classes when building!
+- Different versions require corresponding JAR files, do not place multiple versions on the same server
+- Legacy versions require Java 8+ environment, 1.21 version requires Java 21+ environment
 
 ### 📊 Development Environment
 ```bash
