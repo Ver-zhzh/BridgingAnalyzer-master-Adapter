@@ -108,17 +108,31 @@ public class Adapter_v1_21_R1 implements VersionAdapter {
      * Convert particle name to modern Particle enum
      */
     private Particle getParticleFromName(String particleType) {
-        switch (particleType) {
-            case Particles.FIREWORK: return Particle.FIREWORK;
-            case Particles.WITCH: return Particle.WITCH;
-            case Particles.PORTAL: return Particle.PORTAL;
-            case Particles.FLAME: return Particle.FLAME;
-            default:
-                try {
+        try {
+            switch (particleType) {
+                case Particles.FIREWORK:
+                    // Try modern name first, fallback to legacy
+                    try {
+                        return Particle.valueOf("FIREWORK");
+                    } catch (IllegalArgumentException e) {
+                        return Particle.valueOf("FIREWORKS_SPARK");
+                    }
+                case Particles.WITCH:
+                    // Try modern name first, fallback to legacy
+                    try {
+                        return Particle.valueOf("WITCH");
+                    } catch (IllegalArgumentException e) {
+                        return Particle.valueOf("SPELL_WITCH");
+                    }
+                case Particles.PORTAL:
+                    return Particle.valueOf("PORTAL");
+                case Particles.FLAME:
+                    return Particle.valueOf("FLAME");
+                default:
                     return Particle.valueOf(particleType);
-                } catch (IllegalArgumentException e) {
-                    return null;
-                }
+            }
+        } catch (IllegalArgumentException e) {
+            return null;
         }
     }
 }

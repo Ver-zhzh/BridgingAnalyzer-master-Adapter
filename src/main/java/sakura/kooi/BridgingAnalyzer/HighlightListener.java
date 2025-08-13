@@ -72,7 +72,19 @@ public class HighlightListener implements Listener {
     @EventHandler
     public void onStandBridgeMove(PlayerMoveEvent e) {
         if (!BridgingAnalyzer.getCounter(e.getPlayer()).isStandBridgeMarkerEnabled()) return;
-        e.getTo().getWorld().spawnParticle(Particle.HAPPY_VILLAGER, e.getTo().clone().add(0.08, 0.0, 0.08), 5, 0, 0, 0, 0);
+        // Use version adapter for cross-version particle compatibility
+        try {
+            Particle happyVillager;
+            try {
+                happyVillager = Particle.valueOf("HAPPY_VILLAGER");
+            } catch (IllegalArgumentException ex) {
+                // Fallback for older versions
+                happyVillager = Particle.valueOf("VILLAGER_HAPPY");
+            }
+            e.getTo().getWorld().spawnParticle(happyVillager, e.getTo().clone().add(0.08, 0.0, 0.08), 5, 0, 0, 0, 0);
+        } catch (Exception ex) {
+            // Ignore particle errors on incompatible versions
+        }
     }
 
     private Location roundLocation(Location location) {

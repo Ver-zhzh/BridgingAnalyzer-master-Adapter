@@ -10,8 +10,8 @@ import sakura.kooi.BridgingAnalyzer.api.VersionAdapter;
 
 /**
  * Version adapter for Minecraft 1.12.2 (v1_12_R1)
- * Last version before the 1.13 material system overhaul
- * 
+ * Last supported version before modern material system (1.14+)
+ *
  * @author Ver_zhzh
  */
 public class Adapter_v1_12_R1 implements VersionAdapter {
@@ -66,7 +66,7 @@ public class Adapter_v1_12_R1 implements VersionAdapter {
     
     @Override
     public Material getMaterial(String materialName) {
-        // Handle legacy material names for 1.12.2 (last pre-1.13 version)
+        // Handle legacy material names for 1.12.2 (last pre-modern version)
         switch (materialName) {
             case Materials.GOLDEN_PICKAXE: return Material.valueOf("GOLD_PICKAXE");
             case Materials.SMOOTH_SANDSTONE: return Material.valueOf("SANDSTONE");

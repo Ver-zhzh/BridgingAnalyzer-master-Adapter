@@ -8,9 +8,10 @@ import org.bukkit.util.Vector;
 import java.util.List;
 
 /**
- * Cross-version particle effects system for Minecraft 1.8.8 - 1.21
+ * Cross-version particle effects system for Minecraft 1.8.8 - 1.21 (excluding 1.13)
  * Uses ParticleManager for version compatibility
- * Simplified version to ensure compatibility across all versions
+ * Supported versions: 1.8.8, 1.9.4, 1.11.2, 1.12.2, 1.14.4+, 1.21+
+ * Simplified version to ensure compatibility across all supported versions
  */
 public class ModernParticleEffects {
 

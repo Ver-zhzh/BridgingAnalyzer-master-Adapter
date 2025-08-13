@@ -9,23 +9,23 @@ import org.bukkit.inventory.ItemStack;
 import sakura.kooi.BridgingAnalyzer.api.VersionAdapter;
 
 /**
- * Version adapter for Minecraft 1.13.2 (v1_13_R2)
- * Uses modern (flattened) Bukkit API introduced in 1.13
- * First version with modern material system and BlockData API
- *
+ * Version adapter for Minecraft 1.15.2 (v1_15_R1)
+ * Supports modern material system with bee-related updates
+ * Uses modern Bukkit API with BlockData support
+ * 
  * @author Ver_zhzh
  */
-public class Adapter_v1_13_R2 implements VersionAdapter {
-
+public class Adapter_v1_15_R1 implements VersionAdapter {
+    
     @Override
     public String getSupportedVersion() {
-        return "v1_13_R2";
+        return "v1_15_R1";
     }
-
+    
     @Override
     public void sendTitle(Player player, String title, String subtitle, int fadeIn, int stay, int fadeOut) {
         try {
-            // 1.13+ native Title API
+            // 1.15 has native Title API
             player.sendTitle(title, subtitle, fadeIn, stay, fadeOut);
         } catch (Exception e) {
             // Fallback: send as chat message
@@ -37,21 +37,21 @@ public class Adapter_v1_13_R2 implements VersionAdapter {
             }
         }
     }
-
+    
     @Override
     public void sendActionBar(Player player, String message) {
         try {
-            // Spigot ActionBar API (present on 1.13)
+            // Try Spigot ActionBar API
             player.spigot().sendMessage(
-                net.md_5.bungee.api.ChatMessageType.ACTION_BAR,
+                net.md_5.bungee.api.ChatMessageType.ACTION_BAR, 
                 net.md_5.bungee.api.chat.TextComponent.fromLegacyText(message)
             );
         } catch (Exception e) {
-            // Final fallback: send as chat message
+            // Fallback: send as chat message
             player.sendMessage("§e[ActionBar] " + message);
         }
     }
-
+    
     @Override
     public void spawnParticle(Location location, String particleType, int count) {
         try {
@@ -59,20 +59,21 @@ public class Adapter_v1_13_R2 implements VersionAdapter {
             if (particle != null) {
                 location.getWorld().spawnParticle(particle, location, count, 0, 0, 0, 0);
             }
-        } catch (Exception ignored) {
+        } catch (Exception e) {
+            // Ignore particle errors
         }
     }
-
+    
     @Override
     public Material getMaterial(String materialName) {
-        // 1.13+ uses modern flattened material names
+        // 1.15 uses modern flattened material names
         try {
             return Material.valueOf(materialName);
         } catch (IllegalArgumentException e) {
             return null;
         }
     }
-
+    
     @Override
     public Sound getSound(String soundName) {
         try {
@@ -81,19 +82,19 @@ public class Adapter_v1_13_R2 implements VersionAdapter {
             return null;
         }
     }
-
+    
     @Override
     public ItemStack createItemStack(Material material, int amount, short data) {
-        // Data deprecated in 1.13+, ignore
+        // 1.15+ ignores data parameter (use modern BlockData instead)
         return new ItemStack(material, amount);
     }
-
+    
     @Override
     public void sendBlockChange(Player player, Location location, Material material, byte data) {
-        // 1.13+ BlockData API
+        // 1.15+ uses modern BlockData API
         player.sendBlockChange(location, material.createBlockData());
     }
-
+    
     @Override
     public boolean supportsFeature(String feature) {
         switch (feature) {
@@ -107,19 +108,19 @@ public class Adapter_v1_13_R2 implements VersionAdapter {
                 return false;
         }
     }
-
+    
     /**
-     * Map abstract particle names to 1.13 particle enum names.
-     * We avoid referencing enum constants directly to prevent NoSuchFieldError on cross-compiles.
+     * Map abstract particle names to 1.15 particle enum names.
+     * 1.15 maintains compatibility with 1.14 particle names.
      */
     private Particle getParticleFromName(String particleType) {
         try {
             switch (particleType) {
                 case Particles.FIREWORK:
-                    // In 1.13, FIREWORKS_SPARK is the firework particle name
+                    // In 1.15, FIREWORKS_SPARK is still the correct name
                     return Particle.valueOf("FIREWORKS_SPARK");
                 case Particles.WITCH:
-                    // 1.13 keeps SPELL_WITCH
+                    // 1.15 uses SPELL_WITCH
                     return Particle.valueOf("SPELL_WITCH");
                 case Particles.PORTAL:
                     return Particle.valueOf("PORTAL");

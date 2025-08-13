@@ -8,8 +8,9 @@ import org.bukkit.inventory.ItemStack;
 
 /**
  * Version adapter interface for cross-version compatibility
- * Handles API differences between Minecraft versions 1.8.8 - 1.21
- * 
+ * Handles API differences between Minecraft versions 1.8.8 - 1.21 (excluding 1.13)
+ * Supported versions: 1.8.8, 1.9.4, 1.11.2, 1.12.2, 1.14.4+, 1.21+
+ *
  * @author Ver_zhzh
  */
 public interface VersionAdapter {
@@ -91,7 +92,7 @@ public interface VersionAdapter {
     interface Features {
         String TITLE_API = "title_api";           // 1.11+
         String PARTICLE_API = "particle_api";     // 1.9+
-        String MODERN_MATERIALS = "modern_materials"; // 1.13+
+        String MODERN_MATERIALS = "modern_materials"; // 1.14+ (1.13 not supported)
         String ACTION_BAR = "action_bar";         // All versions (different implementations)
         String SPIGOT_API = "spigot_api";         // Spigot-specific features
     }

@@ -13,7 +13,7 @@ import java.lang.reflect.Method;
 public class NoAIUtils {
 
     // Modern API reflection (to avoid NoClassDefFoundError on 1.8)
-    private static Class<?> mobClass; // org.bukkit.entity.Mob (1.13+)
+    private static Class<?> mobClass; // org.bukkit.entity.Mob (1.14+)
     private static Method mobSetAware; // Mob#setAware(boolean)
     private static Method livingSetAI; // LivingEntity#setAI(boolean) (1.9+)
 

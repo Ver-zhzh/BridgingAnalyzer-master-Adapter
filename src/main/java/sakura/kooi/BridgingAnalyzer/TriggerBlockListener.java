@@ -190,7 +190,7 @@ public class TriggerBlockListener implements Listener {
         if (e.getTo().getBlock().getRelative(BlockFace.DOWN).getType() == Material.BEACON) {
             e.getPlayer().setNoDamageTicks(20);
             Block to = e.getTo().getBlock();
-            while ((to.getType() == Material.AIR || to.getType() == Material.GLASS_PANE || to.getType() == Material.OAK_WALL_SIGN || to.getType() == Material.OAK_SIGN) && to.getY() < 255) {
+            while ((to.getType() == Material.AIR || to.getType() == Material.GLASS_PANE || isSignMaterial(to.getType())) && to.getY() < 255) {
                 to = to.getRelative(BlockFace.UP);
             }
             if (to.getType() == Material.BEACON) {
@@ -226,7 +226,7 @@ public class TriggerBlockListener implements Listener {
         if (e.getPlayer().getLocation().getBlock().getRelative(BlockFace.DOWN).getType() == Material.BEACON) {
             e.getPlayer().setNoDamageTicks(20);
             Block to = e.getPlayer().getLocation().getBlock().getRelative(BlockFace.DOWN, 2);
-            while ((to.getType() == Material.AIR || to.getType() == Material.GLASS_PANE || to.getType() == Material.OAK_WALL_SIGN || to.getType() == Material.OAK_SIGN) && to.getY() > 0) {
+            while ((to.getType() == Material.AIR || to.getType() == Material.GLASS_PANE || isSignMaterial(to.getType())) && to.getY() > 0) {
                 to = to.getRelative(BlockFace.DOWN);
             }
             if (to.getType() == Material.BEACON) {
@@ -250,6 +250,25 @@ public class TriggerBlockListener implements Listener {
                         1, 1);
             }
 
+        }
+    }
+
+    /**
+     * Check if a material is a sign (cross-version compatible)
+     */
+    private boolean isSignMaterial(Material material) {
+        String materialName = material.name();
+        // Check for modern sign names (1.14+)
+        if (materialName.contains("SIGN")) {
+            return true;
+        }
+        // Check for legacy sign names (1.13 and below)
+        try {
+            return material == Material.valueOf("SIGN_POST") ||
+                   material == Material.valueOf("WALL_SIGN") ||
+                   material == Material.valueOf("SIGN");
+        } catch (IllegalArgumentException e) {
+            return false;
         }
     }
 }

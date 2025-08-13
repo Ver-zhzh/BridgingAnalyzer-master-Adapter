@@ -52,7 +52,7 @@ public class FireworkUtils {
         // Use cross-version compatible EntityType
         EntityType fireworkType;
         try {
-            // Try modern name first (1.13+)
+            // Try modern name first (1.14+)
             fireworkType = EntityType.valueOf("FIREWORK_ROCKET");
         } catch (IllegalArgumentException e) {
             // Fallback to legacy name (1.8.8-1.12.2)

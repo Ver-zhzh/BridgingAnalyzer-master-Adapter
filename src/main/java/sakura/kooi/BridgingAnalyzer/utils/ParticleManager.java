@@ -6,8 +6,9 @@ import sakura.kooi.BridgingAnalyzer.api.VersionAdapter;
 /**
  * Cross-version particle manager
  * Handles particle effects through version adapters to ensure compatibility
- * across Minecraft versions 1.8.8 - 1.21
- * 
+ * across Minecraft versions 1.8.8 - 1.21 (excluding 1.13)
+ * Supported versions: 1.8.8, 1.9.4, 1.11.2, 1.12.2, 1.14.4+, 1.21+
+ *
  * @author Ver_zhzh
  */
 public class ParticleManager {

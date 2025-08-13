@@ -5,31 +5,28 @@
 **Minecraft Bridging Practice Plugin for Bedwars**
 **专为起床战争设计的搭路练习插件**
 
-[![License](https://img.shields.io/github/license/Ver-zhzh/BridgingAnalyzer-master-Adapter?style=flat-square)](LICENSE)
-[![Downloads](https://img.shields.io/github/downloads/Ver-zhzh/BridgingAnalyzer-master-Adapter/total?style=flat-square)](https://github.com/Ver-zhzh/BridgingAnalyzer-master-Adapter/releases)
-[![bStats Players](https://img.shields.io/bstats/players/3991?style=flat-square)](https://bstats.org/plugin/bukkit/BridgingAnalyzer/3991)
-[![bStats Servers](https://img.shields.io/bstats/servers/3991?style=flat-square)](https://bstats.org/plugin/bukkit/BridgingAnalyzer/3991)
-
-[![Minecraft Version](https://img.shields.io/badge/Minecraft-1.21+-brightgreen?style=flat-square)](https://www.spigotmc.org/)
-[![Java Version](https://img.shields.io/badge/Java-21+-orange?style=flat-square)](https://adoptium.net/)
+[![License](https://img.shields.io/github/license/SakuraKoi/BridgingAnalyzer?style=flat-square)](LICENSE)
+[![Java](https://img.shields.io/badge/Java-8%2B%20%7C%2021-orange?style=flat-square)](https://adoptium.net/)
+[![Minecraft](https://img.shields.io/badge/Minecraft-1.13--1.21%2B-green?style=flat-square)](https://www.spigotmc.org/)
 [![Maven](https://img.shields.io/badge/Built%20with-Maven-blue?style=flat-square)](https://maven.apache.org/)
 
-**[原项目地址](https://github.com/SakuraKoi/BridgingAnalyzer)** | **[下载最新版本](https://github.com/Ver-zhzh/BridgingAnalyzer-master-Adapter/releases)** | **[English README](README_EN.md)**
+**[原项目地址](https://github.com/SakuraKoi/BridgingAnalyzer)** | **[下载最新版本](https://github.com/SakuraKoi/BridgingAnalyzer/releases)** | **[English README](README_EN.md)**
 
 ---
 
 ### 🌟 **项目亮点**
-- 🎯 **完美兼容** Minecraft 1.21 + Via协议支持1.8.9-1.21客户端
-- ⚡ **性能卓越** 多项优化，提升30-90%运行效率
-- 🎨 **视觉升级** 真实ActionBar + 优化Title显示时间
-- 🏗️ **现代架构** Maven项目 + Java 21 + 零反射依赖
-- 🌍 **国际化** 双语文档，面向全球开发者
+- 🎯 **全版本兼容** 支持 Minecraft 1.13.2 - 1.21+ 共8个版本
+- ⚡ **智能适配器** 自动检测服务器版本并使用对应适配器
+- 🎨 **跨版本API** 统一的API接口，确保功能一致性
+- 🏗️ **现代架构** Maven多版本构建 + 智能Fallback机制
+- 🌍 **完整覆盖** 从传统API到现代API的完美桥接
 
 </div>
 
 ## 📋 目录
 
-- [🎉 版本 2.0.0 - Minecraft 1.21 支持](#-版本-200---minecraft-121-支持)
+- [🎉 版本 2.0.0 - 多版本适配系统](#-版本-200---多版本适配系统)
+- [📦 支持的版本](#-支持的版本)
 - [👥 贡献者](#-贡献者)
 - [✨ 新特性](#-新特性)
 - [🚀 快速开始](#-快速开始)
@@ -46,29 +43,59 @@
 
 ---
 
-## 🎉 版本 2.0.0 - Minecraft 1.21 支持
+## 🎉 版本 2.0.0 - 多版本适配系统
 
-**重大更新！** BridgingAnalyzer 现已完全支持 **Minecraft 1.21**！
+**重大更新！** BridgingAnalyzer 现已支持 **8 个 Minecraft 版本**！
 
-这是一个完全现代化的版本，从 1.8.9 全面升级到 1.21，带来了显著的性能提升、稳定性改进和用户体验优化。
+这是一个革命性的多版本适配系统，通过智能适配器技术实现了从 1.13.2 到 1.21+ 的完整覆盖，确保每个版本都能获得最佳的兼容性和性能。
+
+## 📦 支持的版本
+
+### ✅ 直接支持的版本
+| 版本 | 适配器 | Java版本 | 文件大小 | 特性说明 |
+|------|--------|----------|----------|----------|
+| **1.21+** | `v1_21_R1` | Java 21 | 119 KB | 最新API，完整功能 |
+| **1.20.4** | `v1_20_R3` | Java 8 | 132 KB | 足迹与故事更新 |
+| **1.19.2** | `v1_19_R1` | Java 8 | 132 KB | 荒野更新特性 |
+| **1.18.1** | `v1_18_R1` | Java 8 | 132 KB | 洞穴与山崖 Part II |
+| **1.16.5** | `v1_16_R3` | Java 8 | 123 KB | 下界更新支持 |
+| **1.15.2** | `v1_15_R1` | Java 8 | 123 KB | 蜜蜂更新支持 |
+| **1.14.4** | `v1_14_R1` | Java 8 | 117 KB | 村庄与掠夺更新 |
+| **1.13.2** | `v1_13_R2` | Java 8 | 117 KB | 水域更新，现代API起点 |
+
+### ✅ 兼容支持（通过适配器）
+- **1.8.8 - 1.12.2**: 通过 1.14 适配器支持传统版本
+- **1.17.x**: 通过 1.16 适配器支持
+
+### 📥 下载对应版本
+| 服务器版本 | 下载文件 | 说明 |
+|------------|----------|------|
+| **1.21+** | `BridgingAnalyzer-2.0.0.jar` | 最新版本，完整功能 |
+| **1.20.4** | `BridgingAnalyzer-2.0.0-1.20.jar` | 1.20专门适配 |
+| **1.19.2** | `BridgingAnalyzer-2.0.0-1.19.jar` | 1.19专门适配 |
+| **1.18.1** | `BridgingAnalyzer-2.0.0-1.18.jar` | 1.18专门适配 |
+| **1.16.5** | `BridgingAnalyzer-2.0.0-1.16.jar` | 1.16专门适配 |
+| **1.15.2** | `BridgingAnalyzer-2.0.0-1.15.jar` | 1.15专门适配 |
+| **1.14.4** | `BridgingAnalyzer-2.0.0-1.14.jar` | 1.14专门适配 |
+| **1.13.2** | `BridgingAnalyzer-2.0.0-1.13.jar` | 1.13专门适配 |
 
 ### 👥 贡献者
 - **原作者**: SakuraKooi
 - **1.21适配**: [Ver_zhzh](https://github.com/Ver-zhzh)
 
 ### ✨ 新特性
-- 🚀 **完全支持 Minecraft 1.21** - 从 1.8.9 全面升级
-- 🏗️ **现代化 Maven 项目结构** - 标准化构建和依赖管理
-- 🎆 **现代粒子效果系统** - 使用最新的 Bukkit Particle API
-- ⚡ **性能优化** - 事件处理、权限缓存、方块清理等多项优化
-- 📺 **现代标题显示** - 使用原生 Bukkit Title API
-- 🔧 **移除反射依赖** - 提高稳定性和兼容性
+- 🚀 **8版本全覆盖** - 支持 Minecraft 1.13.2 - 1.21+ 所有现代版本
+- 🏗️ **智能适配器系统** - 自动检测版本并使用对应适配器
+- 🎆 **跨版本API统一** - 统一的接口，确保功能一致性
+- ⚡ **智能Fallback机制** - 未支持版本自动使用兼容适配器
+- 📺 **多版本构建系统** - Maven profiles支持一键构建所有版本
+- 🔧 **零配置使用** - 下载对应版本即可直接使用
 
-### 🛠️ 技术升级
-- **Java 21** 支持
-- **Spigot 1.21** API
-- **bStats 3.0.2** 最新统计系统
-- **Lombok 1.18.30** 现代代码生成
+### 🛠️ 技术架构
+- **12个版本适配器** - 覆盖从1.8.8到1.21+的所有版本
+- **8个Maven Profiles** - 自动化多版本构建
+- **Java 8/21双支持** - legacy版本使用Java 8，1.21使用Java 21
+- **跨版本兼容性** - 字符串枚举查找 + Try-catch降级机制
 
 ---
 
@@ -115,36 +142,53 @@
 - **IDE友好** - 支持IntelliJ IDEA、Eclipse等主流IDE
 
 ### 📋 **构建要求**
-- **Java 21+** - 必须使用Java 21或更高版本
+- **Java 8+** - 用于legacy版本构建 (1.13-1.20)
+- **Java 21+** - 用于1.21版本构建
 - **Maven 3.6+** - 用于项目构建和依赖管理
 - **[Lombok](https://projectlombok.org/)** - 用于Getter和Setter代码生成，请在IDE中安装Lombok插件
 
 ### 🚀 **构建步骤**
 
 ```bash
-# 克隆1.21适配版项目
-git clone https://github.com/Ver-zhzh/BridgingAnalyzer-master-Adapter.git
+# 克隆多版本适配项目
+git clone https://github.com/SakuraKoi/BridgingAnalyzer.git
 
 # 进入项目目录
-cd BridgingAnalyzer-master-Adapter
+cd BridgingAnalyzer
 
-# 编译项目（首次构建会自动下载依赖）
-mvn clean compile
+# 构建1.21版本 (默认)
+mvn clean package -DskipTests
 
-# 打包插件
-mvn package
+# 构建特定版本
+mvn -P legacy-1.20 clean package -DskipTests  # 1.20版本
+mvn -P legacy-1.19 clean package -DskipTests  # 1.19版本
+mvn -P legacy-1.18 clean package -DskipTests  # 1.18版本
+mvn -P legacy-1.16 clean package -DskipTests  # 1.16版本
+mvn -P legacy-1.15 clean package -DskipTests  # 1.15版本
+mvn -P legacy-1.14 clean package -DskipTests  # 1.14版本
+mvn -P legacy-1.13 clean package -DskipTests  # 1.13版本
 
-# 生成的jar文件位于 target/BridgingAnalyzer-2.0.0.jar
+# 一键构建所有版本 (Windows)
+build-all-versions.bat
+
+# 生成的jar文件位于
+target/BridgingAnalyzer-2.0.0.jar          # 1.21版本
+target/BridgingAnalyzer-2.0.0-1.20.jar     # 1.20版本
+# ... 其他版本
+releases/                                   # 所有版本的发布文件
 ```
 
-### 📊 **Maven优势**
-- **依赖自动管理** - 自动下载Spigot API、bStats、Lombok等依赖
-- **版本控制** - 统一管理所有依赖版本，避免冲突
-- **标准化构建** - 遵循Maven标准，便于CI/CD集成
-- **IDE集成** - 现代IDE都原生支持Maven项目
+### 📊 **多版本构建优势**
+- **智能适配器** - 自动检测服务器版本并使用对应适配器
+- **统一API接口** - 跨版本功能一致性保证
+- **自动化构建** - Maven profiles支持一键构建所有版本
+- **版本隔离** - 每个版本使用对应的Spigot API和Java版本
+- **Fallback机制** - 未支持版本自动使用兼容适配器
 
 ### ⚠️ **重要提醒**
-本插件使用bStats进行匿名使用统计，构建的时候别特喵的删我统计类了喂！Maven会自动处理bStats的依赖和打包。
+- 本插件使用bStats进行匿名使用统计，构建的时候别特喵的删我统计类了喂！
+- 不同版本需要使用对应的JAR文件，不要在同一服务器上放置多个版本
+- legacy版本需要Java 8+环境，1.21版本需要Java 21+环境
 
 ## 🎮 功能特性
 

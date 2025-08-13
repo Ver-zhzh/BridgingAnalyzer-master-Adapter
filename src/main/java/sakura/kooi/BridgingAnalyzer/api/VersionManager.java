@@ -115,12 +115,14 @@ public class VersionManager {
         if (version.startsWith("v1_9")) return loadAdapter("v1_9_R2");
         if (version.startsWith("v1_11")) return loadAdapter("v1_11_R1");
         if (version.startsWith("v1_12")) return loadAdapter("v1_12_R1");
-        // Treat 1.13–1.20 as modern API compatible with 1.13 adapter implementation
-        if (version.startsWith("v1_13") || version.startsWith("v1_14") || version.startsWith("v1_15")
-                || version.startsWith("v1_16") || version.startsWith("v1_17") || version.startsWith("v1_18")
-                || version.startsWith("v1_19") || version.startsWith("v1_20")) {
-            return loadAdapter("v1_13_R2");
-        }
+        if (version.startsWith("v1_13")) return loadAdapter("v1_13_R2");
+        if (version.startsWith("v1_14")) return loadAdapter("v1_14_R1");
+        if (version.startsWith("v1_15")) return loadAdapter("v1_15_R1");
+        if (version.startsWith("v1_16")) return loadAdapter("v1_16_R3");
+        if (version.startsWith("v1_17")) return loadAdapter("v1_16_R3"); // Fallback to 1.16
+        if (version.startsWith("v1_18")) return loadAdapter("v1_18_R1");
+        if (version.startsWith("v1_19")) return loadAdapter("v1_19_R1");
+        if (version.startsWith("v1_20")) return loadAdapter("v1_20_R3");
         if (version.startsWith("v1_21")) return loadAdapter("v1_21_R1");
         return null;
     }

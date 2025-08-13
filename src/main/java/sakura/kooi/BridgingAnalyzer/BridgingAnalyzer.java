@@ -114,7 +114,7 @@ public class BridgingAnalyzer extends JavaPlugin implements Listener {
             if (stand.getCustomName().contains("VillagerSpawnPoint")) {
                 Villager vi = (Villager) stand.getWorld().spawnEntity(stand.getLocation().add(0, 1, 0),
                         EntityType.VILLAGER);
-                // Cross-version: SLOWNESS (1.13+) vs SLOW (1.12-1.8)
+                // Cross-version: SLOWNESS (1.14+) vs SLOW (1.12-1.8)
                 PotionEffectType slowType = PotionEffectType.getByName("SLOWNESS");
                 if (slowType == null) slowType = PotionEffectType.getByName("SLOW");
                 if (slowType != null) {

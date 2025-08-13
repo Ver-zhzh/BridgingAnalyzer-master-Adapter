@@ -50,6 +50,7 @@ Thumbs.db
 *.class
 *.log
 *.jar
+!releases/*.jar
 *.war
 *.ear
 *.zip
