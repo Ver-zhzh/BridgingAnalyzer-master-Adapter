@@ -110,6 +110,7 @@ public interface VersionAdapter {
         String MELON_BLOCK = "MELON_BLOCK";
         String BEACON = "BEACON";
         String SNOW_BLOCK = "SNOW_BLOCK";
+        String GLASS_PANE = "GLASS_PANE";
     }
     
     /**

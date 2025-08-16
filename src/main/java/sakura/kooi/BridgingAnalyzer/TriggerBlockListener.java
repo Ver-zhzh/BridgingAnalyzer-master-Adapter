@@ -104,7 +104,19 @@ public class TriggerBlockListener implements Listener {
         if (e.getFrom().getBlock().equals(e.getTo().getBlock())) return;
         if (e.getPlayer().getNoDamageTicks() != 0) return;
         if (e.getPlayer().getGameMode() != GameMode.SURVIVAL) return;
-        if (e.getTo().getBlock().getRelative(BlockFace.DOWN).getType() == Material.MELON) {
+
+        // Use version adapter for cross-version material compatibility
+        Material melonBlock = sakura.kooi.BridgingAnalyzer.api.VersionManager.getAdapter().getMaterial(sakura.kooi.BridgingAnalyzer.api.VersionAdapter.Materials.MELON_BLOCK);
+        if (melonBlock == null) {
+            // Fallback for older versions
+            try {
+                melonBlock = Material.valueOf("MELON");
+            } catch (IllegalArgumentException ex) {
+                melonBlock = Material.valueOf("MELON_BLOCK"); // Modern fallback
+            }
+        }
+
+        if (e.getTo().getBlock().getRelative(BlockFace.DOWN).getType() == melonBlock) {
             e.getPlayer().setNoDamageTicks(20);
 
             Player player = e.getPlayer();
@@ -190,7 +202,19 @@ public class TriggerBlockListener implements Listener {
         if (e.getTo().getBlock().getRelative(BlockFace.DOWN).getType() == Material.BEACON) {
             e.getPlayer().setNoDamageTicks(20);
             Block to = e.getTo().getBlock();
-            while ((to.getType() == Material.AIR || to.getType() == Material.GLASS_PANE || isSignMaterial(to.getType())) && to.getY() < 255) {
+
+            // Use version adapter for cross-version material compatibility
+            Material glassPane = sakura.kooi.BridgingAnalyzer.api.VersionManager.getAdapter().getMaterial(sakura.kooi.BridgingAnalyzer.api.VersionAdapter.Materials.GLASS_PANE);
+            if (glassPane == null) {
+                // Fallback for older versions
+                try {
+                    glassPane = Material.valueOf("THIN_GLASS");
+                } catch (IllegalArgumentException ex) {
+                    glassPane = Material.valueOf("GLASS_PANE"); // Modern fallback
+                }
+            }
+
+            while ((to.getType() == Material.AIR || to.getType() == glassPane || isSignMaterial(to.getType())) && to.getY() < 255) {
                 to = to.getRelative(BlockFace.UP);
             }
             if (to.getType() == Material.BEACON) {
@@ -226,7 +250,19 @@ public class TriggerBlockListener implements Listener {
         if (e.getPlayer().getLocation().getBlock().getRelative(BlockFace.DOWN).getType() == Material.BEACON) {
             e.getPlayer().setNoDamageTicks(20);
             Block to = e.getPlayer().getLocation().getBlock().getRelative(BlockFace.DOWN, 2);
-            while ((to.getType() == Material.AIR || to.getType() == Material.GLASS_PANE || isSignMaterial(to.getType())) && to.getY() > 0) {
+
+            // Use version adapter for cross-version material compatibility
+            Material glassPane = sakura.kooi.BridgingAnalyzer.api.VersionManager.getAdapter().getMaterial(sakura.kooi.BridgingAnalyzer.api.VersionAdapter.Materials.GLASS_PANE);
+            if (glassPane == null) {
+                // Fallback for older versions
+                try {
+                    glassPane = Material.valueOf("THIN_GLASS");
+                } catch (IllegalArgumentException ex) {
+                    glassPane = Material.valueOf("GLASS_PANE"); // Modern fallback
+                }
+            }
+
+            while ((to.getType() == Material.AIR || to.getType() == glassPane || isSignMaterial(to.getType())) && to.getY() > 0) {
                 to = to.getRelative(BlockFace.DOWN);
             }
             if (to.getType() == Material.BEACON) {
