@@ -68,8 +68,10 @@ public class TriggerBlockListener implements Listener {
 
             };
             TitleUtils.sendTitle(e.getPlayer(), "", "§a传送点已设置", 5, 10, 5);
-            e.getPlayer().getWorld().playSound(e.getTo(),
-                    SoundMachine.get("ORB_PICKUP", "ENTITY_EXPERIENCE_ORB_PICKUP"), 1, 1);
+            Sound orbPickupSound = sakura.kooi.BridgingAnalyzer.api.VersionManager.getAdapter().getSound(sakura.kooi.BridgingAnalyzer.api.VersionAdapter.Sounds.ENTITY_EXPERIENCE_ORB_PICKUP);
+            if (orbPickupSound != null) {
+                e.getPlayer().getWorld().playSound(e.getTo(), orbPickupSound, 1, 1);
+            }
         }
     }
 
@@ -238,9 +240,10 @@ public class TriggerBlockListener implements Listener {
                     }
 
                 };
-                e.getPlayer().getWorld().playSound(e.getTo(),
-                        SoundMachine.get("ENDERMAN_TELEPORT", "ENTITY_ENDERMEN_TELEPORT"),
-                        1, 1);
+                Sound teleportSound = sakura.kooi.BridgingAnalyzer.api.VersionManager.getAdapter().getSound(sakura.kooi.BridgingAnalyzer.api.VersionAdapter.Sounds.ENTITY_ENDERMEN_TELEPORT);
+                if (teleportSound != null) {
+                    e.getPlayer().getWorld().playSound(e.getTo(), teleportSound, 1, 1);
+                }
             }
 
         }
@@ -285,9 +288,10 @@ public class TriggerBlockListener implements Listener {
                     }
 
                 };
-                e.getPlayer().getWorld().playSound(e.getPlayer().getLocation(),
-                        SoundMachine.get("ENDERMAN_TELEPORT", "ENTITY_ENDERMEN_TELEPORT"),
-                        1, 1);
+                Sound teleportSound = sakura.kooi.BridgingAnalyzer.api.VersionManager.getAdapter().getSound(sakura.kooi.BridgingAnalyzer.api.VersionAdapter.Sounds.ENTITY_ENDERMEN_TELEPORT);
+                if (teleportSound != null) {
+                    e.getPlayer().getWorld().playSound(e.getPlayer().getLocation(), teleportSound, 1, 1);
+                }
             }
 
         }
