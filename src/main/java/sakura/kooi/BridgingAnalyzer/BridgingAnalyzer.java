@@ -296,7 +296,19 @@ public class BridgingAnalyzer extends JavaPlugin implements Listener {
     public void onDropItem(PlayerDropItemEvent e) {
         // Performance optimization: use cached permission check
         if (hasNoClearPermission(e.getPlayer())) return;
-        if (e.getItemDrop().getItemStack().getType() == Material.GOLDEN_PICKAXE) {
+
+        // Use version adapter for cross-version material compatibility
+        Material goldenPickaxe = sakura.kooi.BridgingAnalyzer.api.VersionManager.getAdapter().getMaterial(sakura.kooi.BridgingAnalyzer.api.VersionAdapter.Materials.GOLDEN_PICKAXE);
+        if (goldenPickaxe == null) {
+            // Fallback for older versions
+            try {
+                goldenPickaxe = Material.valueOf("GOLD_PICKAXE");
+            } catch (IllegalArgumentException ex) {
+                goldenPickaxe = Material.valueOf("GOLDEN_PICKAXE"); // Modern fallback
+            }
+        }
+
+        if (e.getItemDrop().getItemStack().getType() == goldenPickaxe) {
             e.getItemDrop().remove();
         }
     }
