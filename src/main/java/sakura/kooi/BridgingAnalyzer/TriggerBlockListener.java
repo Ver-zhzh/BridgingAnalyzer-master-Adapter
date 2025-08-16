@@ -108,11 +108,15 @@ public class TriggerBlockListener implements Listener {
         // Use version adapter for cross-version material compatibility
         Material melonBlock = sakura.kooi.BridgingAnalyzer.api.VersionManager.getAdapter().getMaterial(sakura.kooi.BridgingAnalyzer.api.VersionAdapter.Materials.MELON_BLOCK);
         if (melonBlock == null) {
-            // Fallback for older versions
+            // Fallback for older versions - try MELON_BLOCK first (1.8.8-1.12.2), then MELON (very old versions)
             try {
-                melonBlock = Material.valueOf("MELON");
+                melonBlock = Material.valueOf("MELON_BLOCK");
             } catch (IllegalArgumentException ex) {
-                melonBlock = Material.valueOf("MELON_BLOCK"); // Modern fallback
+                try {
+                    melonBlock = Material.valueOf("MELON"); // Ultimate fallback
+                } catch (IllegalArgumentException ex2) {
+                    melonBlock = Material.STONE; // Safety fallback
+                }
             }
         }
 

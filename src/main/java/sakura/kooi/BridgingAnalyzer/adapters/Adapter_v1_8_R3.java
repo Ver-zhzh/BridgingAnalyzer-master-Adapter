@@ -207,7 +207,7 @@ public class Adapter_v1_8_R3 implements VersionAdapter {
             case Materials.SMOOTH_SANDSTONE: return Material.valueOf("SANDSTONE");
             case Materials.FIREWORK_ROCKET: return Material.valueOf("FIREWORK");
             case Materials.GLASS_PANE: return Material.valueOf("THIN_GLASS");
-            case Materials.MELON_BLOCK: return Material.valueOf("MELON");
+            case Materials.MELON_BLOCK: return Material.valueOf("MELON_BLOCK");
             case "STONE_BRICKS": return Material.valueOf("SMOOTH_BRICK");
             case "LIGHT_WEIGHTED_PRESSURE_PLATE": return Material.valueOf("GOLD_PLATE");
             case "HEAVY_WEIGHTED_PRESSURE_PLATE": return Material.valueOf("IRON_PLATE");

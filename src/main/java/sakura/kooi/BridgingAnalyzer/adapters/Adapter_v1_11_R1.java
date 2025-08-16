@@ -72,7 +72,7 @@ public class Adapter_v1_11_R1 implements VersionAdapter {
             case Materials.SMOOTH_SANDSTONE: return Material.valueOf("SANDSTONE");
             case Materials.FIREWORK_ROCKET: return Material.valueOf("FIREWORK");
             case Materials.GLASS_PANE: return Material.valueOf("THIN_GLASS");
-            case Materials.MELON_BLOCK: return Material.valueOf("MELON");
+            case Materials.MELON_BLOCK: return Material.valueOf("MELON_BLOCK");
             default:
                 try {
                     return Material.valueOf(materialName);
