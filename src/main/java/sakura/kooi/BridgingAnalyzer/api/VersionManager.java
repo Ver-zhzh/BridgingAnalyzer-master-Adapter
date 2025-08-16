@@ -77,7 +77,7 @@ public class VersionManager {
      * Map Bukkit version to NMS version
      */
     private static String mapBukkitVersionToNMS(String bukkitVersion) {
-        if (bukkitVersion.contains("1.8.8")) return "v1_8_R3";
+        if (bukkitVersion.contains("1.8.8") || bukkitVersion.contains("1.8.9")) return "v1_8_R3";
         if (bukkitVersion.contains("1.9.4")) return "v1_9_R2";
         if (bukkitVersion.contains("1.11.2")) return "v1_11_R1";
         if (bukkitVersion.contains("1.12.2")) return "v1_12_R1";

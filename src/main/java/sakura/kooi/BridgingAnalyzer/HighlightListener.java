@@ -44,8 +44,9 @@ public class HighlightListener implements Listener {
         if (e.getTo().getY() < 0) {
             Block historyBlock = highlightHistory.get(e.getPlayer());
             if (historyBlock != null) {
-                // Fix: Use modern sendBlockChange API for 1.21 compatibility
-                e.getPlayer().sendBlockChange(historyBlock.getLocation(), historyBlock.getBlockData());
+                // Use version adapter for cross-version block change compatibility
+                sakura.kooi.BridgingAnalyzer.api.VersionManager.getAdapter().sendBlockChange(
+                    e.getPlayer(), historyBlock.getLocation(), historyBlock.getType(), (byte) 0);
             }
         }
     }
@@ -59,11 +60,17 @@ public class HighlightListener implements Listener {
             if (target != null) {
                 Block historyBlock = highlightHistory.get(e.getPlayer());
                 if (historyBlock != null) {
-                    // Fix: Use modern sendBlockChange API for 1.21 compatibility
-                    e.getPlayer().sendBlockChange(historyBlock.getLocation(), historyBlock.getBlockData());
+                    // Use version adapter for cross-version block change compatibility
+                    sakura.kooi.BridgingAnalyzer.api.VersionManager.getAdapter().sendBlockChange(
+                        e.getPlayer(), historyBlock.getLocation(), historyBlock.getType(), (byte) 0);
                 }
-                // Fix: Use modern BlockData API instead of deprecated byte data
-                e.getPlayer().sendBlockChange(target.getLocation(), Material.SNOW_BLOCK.createBlockData());
+                // Use version adapter for cross-version material compatibility
+                Material snowBlock = sakura.kooi.BridgingAnalyzer.api.VersionManager.getAdapter().getMaterial(sakura.kooi.BridgingAnalyzer.api.VersionAdapter.Materials.SNOW_BLOCK);
+                if (snowBlock == null) {
+                    snowBlock = Material.valueOf("SNOW_BLOCK"); // Fallback
+                }
+                sakura.kooi.BridgingAnalyzer.api.VersionManager.getAdapter().sendBlockChange(
+                    e.getPlayer(), target.getLocation(), snowBlock, (byte) 0);
                 highlightHistory.put(e.getPlayer(), target);
             }
         }
@@ -74,14 +81,8 @@ public class HighlightListener implements Listener {
         if (!BridgingAnalyzer.getCounter(e.getPlayer()).isStandBridgeMarkerEnabled()) return;
         // Use version adapter for cross-version particle compatibility
         try {
-            Particle happyVillager;
-            try {
-                happyVillager = Particle.valueOf("HAPPY_VILLAGER");
-            } catch (IllegalArgumentException ex) {
-                // Fallback for older versions
-                happyVillager = Particle.valueOf("VILLAGER_HAPPY");
-            }
-            e.getTo().getWorld().spawnParticle(happyVillager, e.getTo().clone().add(0.08, 0.0, 0.08), 5, 0, 0, 0, 0);
+            sakura.kooi.BridgingAnalyzer.api.VersionManager.getAdapter().spawnParticle(
+                e.getTo().clone().add(0.08, 0.0, 0.08), "VILLAGER_HAPPY", 5);
         } catch (Exception ex) {
             // Ignore particle errors on incompatible versions
         }
