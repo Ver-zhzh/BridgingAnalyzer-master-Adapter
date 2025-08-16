@@ -76,10 +76,15 @@ public class Adapter_v1_18_R1 implements VersionAdapter {
     
     @Override
     public Sound getSound(String soundName) {
-        try {
-            return Sound.valueOf(soundName);
-        } catch (IllegalArgumentException e) {
-            return null;
+        // Handle sound name changes in 1.18
+        switch (soundName) {
+            case Sounds.ENTITY_ENDERMEN_TELEPORT: return Sound.valueOf("ENTITY_ENDERMAN_TELEPORT");
+            default:
+                try {
+                    return Sound.valueOf(soundName);
+                } catch (IllegalArgumentException e) {
+                    return null;
+                }
         }
     }
     
