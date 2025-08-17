@@ -32,9 +32,7 @@ public class CounterListener implements Listener {
             if (e.getAction() == Action.LEFT_CLICK_BLOCK) if (e.isCancelled()) return;
             Counter c = BridgingAnalyzer.getCounter(e.getPlayer());
             c.countCPS();
-            if (!c.isSpeedCountEnabled()) return;
-            ActionBarUtils.sendActionBar(e.getPlayer(),
-                    "§c§l最大CPS - " + c.getMaxCPS() + " §d§l当前CPS - " + c.getCPS() + " §a§l| §c§l最远距离 - " + c.getMaxBridgeLength() + " §d§l当前距离 - " + c.getBridgeLength());
+            // ActionBar显示现在由定时任务统一处理，这里不再需要显示
         }
     }
 
@@ -42,6 +40,12 @@ public class CounterListener implements Listener {
     public void onFallDown(PlayerMoveEvent e) {
         if (e.getTo().getY() < 0) {
             Counter c = BridgingAnalyzer.getCounter(e.getPlayer());
+
+            // 搭路记时功能：掉落虚空时停止计时（失败，不显示时间）
+            if (c.isBridgeTimingActive()) {
+                c.stopBridgeTiming();
+            }
+
             if (c.isSpeedCountEnabled()) {
                 // Display max bridging speed when falling (6.5s total display time)
                 TitleUtils.sendTitle(e.getPlayer(), "", "§cMax - " + c.getMaxBridgeSpeed() + " block/s", 10, 100, 20);
@@ -62,6 +66,12 @@ public class CounterListener implements Listener {
         if (e.getPlayer() != null) {
             if (e.getPlayer().getGameMode() == GameMode.CREATIVE) return;
             Counter c = BridgingAnalyzer.getCounter(e.getPlayer());
+
+            // 搭路记时功能：如果这是第一个方块且启用了计时功能，开始计时
+            if (c.isBridgeTimingEnabled() && !c.isBridgeTimingActive() && c.getAllBlocks().isEmpty()) {
+                c.startBridgeTiming();
+            }
+
             c.countBridge(e.getBlock());
             if (c.isSpeedCountEnabled()) {
                 // Display bridging speed in title (5s total display time for visibility)

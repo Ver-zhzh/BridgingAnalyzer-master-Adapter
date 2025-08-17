@@ -222,10 +222,11 @@ public class BridgingAnalyzer extends JavaPlugin implements Listener {
         instance = this;
 
         // Display version and modification info
-        getLogger().info("§b§l=== BridgingAnalyzer v2.0.0 ===");
+        getLogger().info("§b§l=== BridgingAnalyzer v2.1.2 ===");
         getLogger().info("§aOriginal Author: SakuraKooi");
         getLogger().info("§a1.21 Adaptation: Ver_zhzh");
         getLogger().info("§eMulti-Version Compatible (1.8.8-1.21)");
+        getLogger().info("§6New Feature: Bridge Timing System");
         getLogger().info("§b§l==============================");
 
         // Initialize version manager first
@@ -264,6 +265,26 @@ public class BridgingAnalyzer extends JavaPlugin implements Listener {
             if (Bukkit.getOnlinePlayers().isEmpty()) return;
             spawnVillager();
         }, 300, 300);
+
+        // 搭路记时功能：定时更新ActionBar显示（集成到CPS显示中）
+        Bukkit.getScheduler().runTaskTimer(this, () -> {
+            for (Player player : Bukkit.getOnlinePlayers()) {
+                Counter counter = getCounter(player);
+                if (counter.isSpeedCountEnabled()) {
+                    // 构建ActionBar消息，包含计时信息
+                    String message = "§c§l最大CPS - " + counter.getMaxCPS() + " §d§l当前CPS - " + counter.getCPS() + " §a§l| §c§l最远距离 - " + counter.getMaxBridgeLength() + " §d§l当前距离 - " + counter.getBridgeLength();
+
+                    // 如果启用了计时功能且正在计时，添加计时信息
+                    if (counter.isBridgeTimingEnabled() && counter.isBridgeTimingActive()) {
+                        message += " §6§l| §a§lTime §f- §e§l" + counter.formatBridgeTime();
+                    }
+
+                    sakura.kooi.BridgingAnalyzer.utils.ActionBarUtils.sendActionBar(player, message);
+                }
+            }
+        }, 0, 2); // 每2tick(0.1秒)更新一次，实现更流畅的显示
+
+
 
         Bukkit.getConsoleSender().sendMessage(new String[]{
                 "§bBridgingAnalyzer §7>> §f----------------------------------------------------------------",

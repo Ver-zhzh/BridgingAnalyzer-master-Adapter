@@ -1,6 +1,6 @@
 name: BridgingAnalyzer
 main: sakura.kooi.BridgingAnalyzer.BridgingAnalyzer
-version: 2.1.1-1.18
+version: 2.1.2-1.18
 api-version: 1.18
 authors: [SakuraKooi, Ver_zhzh(1.18-Adapter)]
 description: Minecraft Bridging Practice for Bedwars - 1.18 Compatible Version

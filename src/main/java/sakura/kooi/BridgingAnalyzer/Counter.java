@@ -41,6 +41,12 @@ public class Counter {
     @Getter
     @Setter
     private boolean standBridgeMarkerEnabled = false;
+    @Getter
+    @Setter
+    private boolean bridgeTimingEnabled = true;
+    private long bridgeStartTime = 0;
+    private long bridgeEndTime = 0;
+    private boolean isBridgeTimingActive = false;
     public Counter(Player p) {
         player = p;
     }
@@ -154,6 +160,7 @@ public class Counter {
         counterBridge.clear();
         maxBridge = 0;
         currentLength = 0;
+        resetBridgeTiming(); // 重置计时功能
         breakBlock();
     }
 
@@ -168,6 +175,7 @@ public class Counter {
 
     public void setCheckPoint(Location loc) {
         checkPoint = loc;
+        resetBridgeTiming(); // 设置新复活点时重置计时
         Block target = loc.add(0, -1, 0).getBlock().getRelative(BlockFace.DOWN, 3);
         if (target.getType() == Material.CHEST) {
             BridgingAnalyzer.clearInventory(player);
@@ -208,6 +216,78 @@ public class Counter {
             }
         BridgingAnalyzer.teleportCheckPoint(player);
         breakBlock();
+    }
+
+    // ===== 搭路记时功能 =====
+
+    /**
+     * 开始搭路计时
+     * 只有在启用计时功能且当前未在计时时才会开始计时
+     */
+    public void startBridgeTiming() {
+        if (bridgeTimingEnabled && !isBridgeTimingActive) {
+            bridgeStartTime = System.currentTimeMillis();
+            bridgeEndTime = 0;
+            isBridgeTimingActive = true;
+        }
+    }
+
+    /**
+     * 停止搭路计时
+     * 记录结束时间并设置计时状态为非活跃
+     */
+    public void stopBridgeTiming() {
+        if (isBridgeTimingActive) {
+            bridgeEndTime = System.currentTimeMillis();
+            isBridgeTimingActive = false;
+        }
+    }
+
+    /**
+     * 重置搭路计时
+     * 清除所有计时数据并停止当前计时
+     */
+    public void resetBridgeTiming() {
+        bridgeStartTime = 0;
+        bridgeEndTime = 0;
+        isBridgeTimingActive = false;
+    }
+
+    /**
+     * 获取当前搭路时间（毫秒）
+     * @return 如果正在计时返回当前经过时间，如果已结束返回总时间，否则返回0
+     */
+    public long getBridgeTime() {
+        if (!bridgeTimingEnabled) return 0;
+        if (isBridgeTimingActive && bridgeStartTime > 0) {
+            return System.currentTimeMillis() - bridgeStartTime;
+        } else if (bridgeEndTime > 0 && bridgeStartTime > 0) {
+            return bridgeEndTime - bridgeStartTime;
+        }
+        return 0;
+    }
+
+    /**
+     * 格式化搭路时间为可读字符串
+     * @return 格式化的时间字符串 (mm:ss.SSS)
+     */
+    public String formatBridgeTime() {
+        long timeMs = getBridgeTime();
+        if (timeMs <= 0) return "00:00.000";
+
+        long minutes = timeMs / 60000;
+        long seconds = (timeMs % 60000) / 1000;
+        long milliseconds = timeMs % 1000;
+
+        return String.format("%02d:%02d.%03d", minutes, seconds, milliseconds);
+    }
+
+    /**
+     * 检查是否正在进行搭路计时
+     * @return true如果正在计时，false否则
+     */
+    public boolean isBridgeTimingActive() {
+        return isBridgeTimingActive;
     }
 
     public class BreakRunnable implements Runnable {

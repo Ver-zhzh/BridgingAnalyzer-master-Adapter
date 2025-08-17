@@ -23,6 +23,7 @@ public class BridgeCommand implements CommandExecutor {
                     "§b§l搭路练习 §7>> §e/bridge pvp         §a启用/禁用伤害屏蔽",
                     "§b§l搭路练习 §7>> §e/bridge speed       §a启用/禁用搭路速度统计",
                     "§b§l搭路练习 §7>> §e/bridge stand       §a启用/禁用走搭位置指示",
+                    "§b§l搭路练习 §7>> §e/bridge time        §a启用/禁用搭路记时功能",
                     "§b§l搭路练习 §7>> §d所配置的参数仅对您有效, 其他玩家不受影响",
                     "§b§l搭路练习 §7>> §bhttps://github.com/SakuraKoi/BridgingAnalyzer"
             );
@@ -48,6 +49,15 @@ public class BridgeCommand implements CommandExecutor {
             case "stand": {
                 counter.setStandBridgeMarkerEnabled(!counter.isStandBridgeMarkerEnabled());
                 sender.sendMessage("§b§l搭路练习 §7>> §a走搭位置指示已" + (counter.isStandBridgeMarkerEnabled() ? "开启" : "关闭"));
+                break;
+            }
+            case "time": {
+                counter.setBridgeTimingEnabled(!counter.isBridgeTimingEnabled());
+                sender.sendMessage("§b§l搭路练习 §7>> §a搭路记时功能已" + (counter.isBridgeTimingEnabled() ? "开启" : "关闭"));
+                // 如果关闭了计时功能且正在计时，停止当前计时
+                if (!counter.isBridgeTimingEnabled() && counter.isBridgeTimingActive()) {
+                    counter.resetBridgeTiming();
+                }
                 break;
             }
             default: {

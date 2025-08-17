@@ -85,6 +85,21 @@ public class TriggerBlockListener implements Listener {
         Material blockBelow = e.getTo().getBlock().getRelative(BlockFace.DOWN).getType();
         if (blockBelow == Material.REDSTONE_BLOCK) {
             e.getPlayer().setNoDamageTicks(40);
+            Counter counter = BridgingAnalyzer.getCounter(e.getPlayer());
+
+            // 搭路记时功能：到达红石块终点时停止计时
+            if (counter.isBridgeTimingActive()) {
+                counter.stopBridgeTiming();
+                if (counter.isBridgeTimingEnabled()) {
+                    // 显示胜利信息和计时结果
+                    TitleUtils.sendTitle(e.getPlayer(), "§6§lVICTORY", "§a§lTime: §e§l" + counter.formatBridgeTime(), 10, 60, 20);
+                } else {
+                    TitleUtils.sendTitle(e.getPlayer(), "§6§lVICTORY", "", 5, 20, 5);
+                }
+            } else {
+                TitleUtils.sendTitle(e.getPlayer(), "§6§lVICTORY", "", 5, 20, 5);
+            }
+
             new ParticleRing(e.getTo().getBlock().getLocation().add(0.5, 0.1, 0.5),
                 sakura.kooi.BridgingAnalyzer.utils.ParticleManager.ParticleTypes.WITCH, 20) {
                 @Override
@@ -94,8 +109,7 @@ public class TriggerBlockListener implements Listener {
                 }
 
             };
-            BridgingAnalyzer.getCounter(e.getPlayer()).vectoryBreakBlock();
-            TitleUtils.sendTitle(e.getPlayer(), "§6§lVICTORY", "", 5, 20, 5);
+            counter.vectoryBreakBlock();
             e.getPlayer().getWorld().playSound(e.getTo(),
                 SoundMachine.get("LEVEL_UP", "ENTITY_PLAYER_LEVELUP"), 1, 1);
         }
