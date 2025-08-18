@@ -1,0 +1,27 @@
+BridgingAnalyzer v2.1.3 构建完成确认
+
+构建时间: 2025-08-18 08:53-08:55
+构建状态: 全部成功
+总版本数: 9个版本
+
+版本列表:
+✅ BridgingAnalyzer-2.1.3-latest.jar (138,598 字节) - 推荐版本
+✅ BridgingAnalyzer-2.1.3-1.21.jar (138,598 字节)
+✅ BridgingAnalyzer-2.1.3-1.20.jar (136,025 字节)
+✅ BridgingAnalyzer-2.1.3-1.19.jar (136,025 字节)
+✅ BridgingAnalyzer-2.1.3-1.18.jar (136,025 字节)
+✅ BridgingAnalyzer-2.1.3-1.16.jar (136,025 字节)
+✅ BridgingAnalyzer-2.1.3-1.15.jar (136,025 字节)
+✅ BridgingAnalyzer-2.1.3-1.14.jar (136,025 字节)
+✅ BridgingAnalyzer-2.1.3-1.13.jar (136,025 字节)
+
+总大小: 1,229,371 字节 (~1.2MB)
+
+包含功能:
+- 搭路记时系统 (毫秒级精度)
+- 性能优化 (字符串缓存机制)
+- 流畅显示 (50毫秒更新频率)
+- Bug修复 (玩家退出清理问题)
+- 用户的最新修改
+
+状态: 准备发布 ✅

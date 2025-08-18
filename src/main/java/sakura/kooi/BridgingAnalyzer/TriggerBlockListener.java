@@ -58,7 +58,11 @@ public class TriggerBlockListener implements Listener {
             spawnLoc.setYaw(e.getPlayer().getLocation().getYaw());
             spawnLoc.setPitch(e.getPlayer().getLocation().getPitch());
             Counter c = BridgingAnalyzer.getCounter(e.getPlayer());
+
+            // 修复Bug：设置复活点时清理所有已放置的方块
+            c.instantBreakBlock();
             c.setCheckPoint(spawnLoc);
+
             new ParticleRing(e.getTo().getBlock().getLocation().add(0.5, 1.5, 0.5),
                 sakura.kooi.BridgingAnalyzer.utils.ParticleManager.ParticleTypes.CLOUD, 1) {
 
@@ -163,8 +167,12 @@ public class TriggerBlockListener implements Listener {
         if (blockBelow == Material.LAPIS_BLOCK) {
             e.getPlayer().setNoDamageTicks(40);
             Counter c = BridgingAnalyzer.getCounter(e.getPlayer());
+
+            // 修复Bug：返回出生点时清理所有已放置的方块
+            c.instantBreakBlock();
             c.setCheckPoint(Bukkit.getWorld("world").getSpawnLocation().add(0.5, 1, 0.5));
             c.resetMax();
+
             new ParticleRing(e.getTo().getBlock().getLocation().add(0.5, 1.5,
                     0.5), sakura.kooi.BridgingAnalyzer.utils.ParticleManager.ParticleTypes.FIREWORK, 35) {
 

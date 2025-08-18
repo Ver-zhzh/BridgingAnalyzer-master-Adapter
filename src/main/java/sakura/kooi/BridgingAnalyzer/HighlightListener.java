@@ -8,6 +8,8 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerMoveEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.event.player.PlayerKickEvent;
 import org.bukkit.Particle;
 
 import java.util.HashMap;
@@ -93,6 +95,18 @@ public class HighlightListener implements Listener {
         loc.setX(Math.round(loc.getX()));
         loc.setZ(Math.round(loc.getZ()));
         return loc;
+    }
+
+    @EventHandler
+    public void onPlayerQuit(PlayerQuitEvent e) {
+        // 清理高亮历史记录，防止内存泄漏
+        highlightHistory.remove(e.getPlayer());
+    }
+
+    @EventHandler
+    public void onPlayerKick(PlayerKickEvent e) {
+        // 清理高亮历史记录，防止内存泄漏
+        highlightHistory.remove(e.getPlayer());
     }
 
 }

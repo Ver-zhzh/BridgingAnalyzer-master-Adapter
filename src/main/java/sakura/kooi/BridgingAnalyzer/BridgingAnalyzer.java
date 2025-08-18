@@ -176,7 +176,13 @@ public class BridgingAnalyzer extends JavaPlugin implements Listener {
 
     @EventHandler
     public void logoutBreak(PlayerQuitEvent e) {
-        getCounter(e.getPlayer()).instantBreakBlock();
+        Counter counter = getCounter(e.getPlayer());
+        // 停止计时（如果正在计时）
+        if (counter.isBridgeTimingActive()) {
+            counter.stopBridgeTiming();
+        }
+        // 清除玩家放置的方块
+        counter.instantBreakBlock();
         Bukkit.getConsoleSender().sendMessage("§bBridgingAnalyzer §7>> §a玩家 " + e.getPlayer().getName() + " 离线, 已清除其放置的方块.");
     }
 
@@ -266,7 +272,7 @@ public class BridgingAnalyzer extends JavaPlugin implements Listener {
             spawnVillager();
         }, 300, 300);
 
-        // 搭路记时功能：定时更新ActionBar显示（集成到CPS显示中）
+        // 搭路记时功能：智能更新ActionBar显示（集成到CPS显示中）
         Bukkit.getScheduler().runTaskTimer(this, () -> {
             for (Player player : Bukkit.getOnlinePlayers()) {
                 Counter counter = getCounter(player);
@@ -282,7 +288,7 @@ public class BridgingAnalyzer extends JavaPlugin implements Listener {
                     sakura.kooi.BridgingAnalyzer.utils.ActionBarUtils.sendActionBar(player, message);
                 }
             }
-        }, 0, 2); // 每2tick(0.1秒)更新一次，实现更流畅的显示
+        }, 0, 2); // 每2tick(0.1秒)更新一次，实现流畅显示（已优化缓存减少性能开销）
 
 
 
@@ -338,8 +344,34 @@ public class BridgingAnalyzer extends JavaPlugin implements Listener {
     public void onPlayerQuit(PlayerQuitEvent e) {
         // Clean up permission cache when player leaves
         clearPermissionCache(e.getPlayer());
-        // Clean up counter data
+        // Clean up counter data - ensure blocks are cleared before removing counter
+        Counter counter = counters.get(e.getPlayer());
+        if (counter != null) {
+            // 停止计时（如果正在计时）
+            if (counter.isBridgeTimingActive()) {
+                counter.stopBridgeTiming();
+            }
+            // 确保方块被清除
+            counter.instantBreakBlock();
+        }
         counters.remove(e.getPlayer());
+    }
+
+    @EventHandler
+    public void onPlayerKick(PlayerKickEvent e) {
+        // 处理玩家被踢出的情况，与退出处理相同
+        Counter counter = getCounter(e.getPlayer());
+        // 停止计时（如果正在计时）
+        if (counter.isBridgeTimingActive()) {
+            counter.stopBridgeTiming();
+        }
+        // 清除玩家放置的方块
+        counter.instantBreakBlock();
+        // 清理权限缓存
+        clearPermissionCache(e.getPlayer());
+        // 清理Counter数据
+        counters.remove(e.getPlayer());
+        Bukkit.getConsoleSender().sendMessage("§bBridgingAnalyzer §7>> §a玩家 " + e.getPlayer().getName() + " 被踢出, 已清除其放置的方块.");
     }
 
     @EventHandler

@@ -47,6 +47,9 @@ public class Counter {
     private long bridgeStartTime = 0;
     private long bridgeEndTime = 0;
     private boolean isBridgeTimingActive = false;
+    // 缓存格式化的时间字符串，避免重复计算
+    private String cachedFormattedTime = "00:00.000";
+    private long lastFormattedTimeMs = 0;
     public Counter(Player p) {
         player = p;
     }
@@ -251,6 +254,9 @@ public class Counter {
         bridgeStartTime = 0;
         bridgeEndTime = 0;
         isBridgeTimingActive = false;
+        // 清除缓存
+        cachedFormattedTime = "00:00.000";
+        lastFormattedTimeMs = 0;
     }
 
     /**
@@ -268,18 +274,33 @@ public class Counter {
     }
 
     /**
-     * 格式化搭路时间为可读字符串
+     * 格式化搭路时间为可读字符串（修复进位问题）
      * @return 格式化的时间字符串 (mm:ss.SSS)
      */
     public String formatBridgeTime() {
         long timeMs = getBridgeTime();
         if (timeMs <= 0) return "00:00.000";
 
-        long minutes = timeMs / 60000;
-        long seconds = (timeMs % 60000) / 1000;
+        // 为了确保显示准确性，我们减少缓存的使用，只在时间完全相同时才使用缓存
+        // 这样可以避免因为缓存导致的显示跳跃问题
+        if (timeMs == lastFormattedTimeMs && cachedFormattedTime != null) {
+            return cachedFormattedTime;
+        }
+
+        // 使用更精确的计算方式
+        long totalSeconds = timeMs / 1000;
+        long minutes = totalSeconds / 60;
+        long seconds = totalSeconds % 60;
         long milliseconds = timeMs % 1000;
 
-        return String.format("%02d:%02d.%03d", minutes, seconds, milliseconds);
+        // 确保所有值都在正确范围内
+        minutes = Math.max(0, Math.min(99, minutes));
+        seconds = Math.max(0, Math.min(59, seconds));
+        milliseconds = Math.max(0, Math.min(999, milliseconds));
+
+        cachedFormattedTime = String.format("%02d:%02d.%03d", minutes, seconds, milliseconds);
+        lastFormattedTimeMs = timeMs;
+        return cachedFormattedTime;
     }
 
     /**
