@@ -46,4 +46,13 @@ public class Utils {
         if (item == null) return true;
         return item.getType() == Material.AIR;
     }
+
+    public static ItemStack cloneSingle(ItemStack item) {
+        if (isEmptySlot(item)) {
+            return null;
+        }
+        ItemStack single = item.clone();
+        single.setAmount(1);
+        return single;
+    }
 }

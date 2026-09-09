@@ -8,8 +8,7 @@ import org.bukkit.inventory.ItemStack;
 
 /**
  * Version adapter interface for cross-version compatibility
- * Handles API differences between Minecraft versions 1.8.8 - 1.21 (excluding 1.13)
- * Supported versions: 1.8.8, 1.9.4, 1.11.2, 1.12.2, 1.14.4+, 1.21+
+ * Handles API differences between Minecraft versions 1.8.8 - 26.x+
  *
  * @author Ver_zhzh
  */

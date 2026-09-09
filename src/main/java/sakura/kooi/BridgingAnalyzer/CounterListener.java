@@ -13,16 +13,24 @@ import org.bukkit.event.player.PlayerBucketEmptyEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.inventory.ItemStack;
-import sakura.kooi.BridgingAnalyzer.utils.ActionBarUtils;
 import sakura.kooi.BridgingAnalyzer.utils.TitleUtils;
+import sakura.kooi.BridgingAnalyzer.utils.Utils;
 
 public class CounterListener implements Listener {
     @EventHandler
     public void onBreakBlock(BlockBreakEvent e) {
-        if (e.getPlayer() != null) if (!BridgingAnalyzer.isPlacedByPlayer(e.getBlock())) {
-            if (e.getPlayer().getGameMode() == GameMode.CREATIVE) return;
-            e.setCancelled(true);
+        if (e.getPlayer() == null) {
+            return;
         }
+        if (e.getPlayer().getGameMode() == GameMode.CREATIVE) {
+            return;
+        }
+        if (!BridgingAnalyzer.isPlacedByPlayer(e.getBlock())) {
+            e.setCancelled(true);
+            return;
+        }
+        e.setDropItems(false);
+        e.setExpToDrop(0);
     }
 
     @EventHandler
@@ -32,7 +40,6 @@ public class CounterListener implements Listener {
             if (e.getAction() == Action.LEFT_CLICK_BLOCK) if (e.isCancelled()) return;
             Counter c = BridgingAnalyzer.getCounter(e.getPlayer());
             c.countCPS();
-            // ActionBar显示现在由定时任务统一处理，这里不再需要显示
         }
     }
 
@@ -41,13 +48,11 @@ public class CounterListener implements Listener {
         if (e.getTo().getY() < 0) {
             Counter c = BridgingAnalyzer.getCounter(e.getPlayer());
 
-            // 搭路记时功能：掉落虚空时停止计时（失败，不显示时间）
             if (c.isBridgeTimingActive()) {
                 c.stopBridgeTiming();
             }
 
             if (c.isSpeedCountEnabled()) {
-                // Display max bridging speed when falling (6.5s total display time)
                 TitleUtils.sendTitle(e.getPlayer(), "", "§cMax - " + c.getMaxBridgeSpeed() + " block/s", 10, 100, 20);
             }
             c.reset();
@@ -67,32 +72,43 @@ public class CounterListener implements Listener {
             if (e.getPlayer().getGameMode() == GameMode.CREATIVE) return;
             Counter c = BridgingAnalyzer.getCounter(e.getPlayer());
 
-            // 搭路记时功能：如果这是第一个方块且启用了计时功能，开始计时
             if (c.isBridgeTimingEnabled() && !c.isBridgeTimingActive() && c.getAllBlocks().isEmpty()) {
                 c.startBridgeTiming();
             }
 
             c.countBridge(e.getBlock());
             if (c.isSpeedCountEnabled()) {
-                // Display bridging speed in title (5s total display time for visibility)
                 TitleUtils.sendTitle(e.getPlayer(), "", "§b" + c.getBridgeSpeed() + " block/s", 10, 80, 10);
             }
-            // Fix: Use cross-version compatible ItemStack API
+            final ItemStack replenish = resolvePlacedItem(e);
+            if (replenish == null) {
+                return;
+            }
             Bukkit.getScheduler().runTaskLater(BridgingAnalyzer.getInstance(), () -> {
-                ItemStack handItem;
-                try {
-                    // Try modern API first (1.9+)
-                    handItem = e.getPlayer().getInventory().getItemInMainHand();
-                } catch (NoSuchMethodError ex) {
-                    // Fallback to legacy API (1.8.8)
-                    handItem = e.getPlayer().getInventory().getItemInHand();
+                if (!e.getPlayer().isOnline()) {
+                    return;
                 }
-
-                if (handItem != null && handItem.getType() != Material.AIR) {
-                    e.getPlayer().getInventory().addItem(new ItemStack(handItem.getType(), 1));
-                }
-            }, 1);
+                Utils.addItem(e.getPlayer().getInventory(), replenish);
+            }, 1L);
         }
+    }
+
+    private ItemStack resolvePlacedItem(BlockPlaceEvent event) {
+        ItemStack placedItem = null;
+        try {
+            placedItem = event.getItemInHand();
+        } catch (Throwable ignored) {
+        }
+        ItemStack replenish = Utils.cloneSingle(placedItem);
+        if (replenish != null) {
+            return replenish;
+        }
+
+        Material blockType = event.getBlockPlaced().getType();
+        if (blockType == null || blockType == Material.AIR) {
+            return null;
+        }
+        return new ItemStack(blockType, 1);
     }
 
     @EventHandler

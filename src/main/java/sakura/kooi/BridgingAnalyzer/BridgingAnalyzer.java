@@ -1,17 +1,6 @@
 package sakura.kooi.BridgingAnalyzer;
 
-/**
- * BridgingAnalyzer - Minecraft Bridging Practice Plugin
- *
- * Original Author: SakuraKooi
- * 1.21 Adaptation & Modernization: Ver_zhzh
- *
- * Version 2.0.0 - Minecraft 1.21 Compatible
- * - Complete API modernization from 1.8.9 to 1.21
- * - Maven project structure conversion
- * - Performance optimizations and bug fixes
- * - Modern particle effects and title display systems
- */
+/** Bridging practice plugin (SakuraKooi / Ver_zhzh). Universal JAR for 1.8.8–26.x+. */
 
 import lombok.Getter;
 import lombok.Setter;
@@ -21,10 +10,14 @@ import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.*;
 import org.bukkit.entity.Villager.Profession;
+import org.bukkit.Location;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.Sound;
+import org.bukkit.World;
 import org.bukkit.event.entity.FoodLevelChangeEvent;
 import org.bukkit.event.player.*;
 import org.bukkit.event.weather.WeatherChangeEvent;
@@ -35,14 +28,17 @@ import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
+import sakura.kooi.BridgingAnalyzer.utils.PotionEffectUtils;
 import sakura.kooi.BridgingAnalyzer.commands.*;
 import org.bstats.bukkit.Metrics;
 import sakura.kooi.BridgingAnalyzer.utils.NoAIUtils;
+import sakura.kooi.BridgingAnalyzer.utils.SoundMachine;
 import sakura.kooi.BridgingAnalyzer.utils.TitleUtils;
 import sakura.kooi.BridgingAnalyzer.utils.Utils;
 import sakura.kooi.BridgingAnalyzer.api.BlockSkinProvider;
 
 import java.util.HashMap;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class BridgingAnalyzer extends JavaPlugin implements Listener {
@@ -55,27 +51,24 @@ public class BridgingAnalyzer extends JavaPlugin implements Listener {
     @Setter
     private static BlockSkinProvider blockSkinProvider;
 
-    // Performance optimization: Permission cache to reduce repeated permission checks
     private static final ConcurrentHashMap<Player, Boolean> noClearPermissionCache = new ConcurrentHashMap<>();
+    private static final long TARGET_RESPAWN_DELAY_TICKS = 40L;
+    private final Set<String> pendingTargetRespawns = ConcurrentHashMap.newKeySet();
+    private int actionBarTick = 0;
 
-    /**
-     * Performance optimized permission check with caching
-     */
     public static boolean hasNoClearPermission(Player player) {
         return noClearPermissionCache.computeIfAbsent(player,
             p -> p.hasPermission("bridginganalyzer.noclear"));
     }
 
-    /**
-     * Clear permission cache for a player (call on logout)
-     */
     public static void clearPermissionCache(Player player) {
         noClearPermissionCache.remove(player);
     }
 
     public static void clearEffect(Player player) {
         for (PotionEffect eff : player.getActivePotionEffects()) {
-            if (eff.getType() == PotionEffectType.INVISIBILITY && player.isOp()) {
+            PotionEffectType invisibility = PotionEffectUtils.getEffectType("INVISIBILITY", "invisibility");
+            if (invisibility != null && eff.getType() == invisibility && player.isOp()) {
                 continue;
             }
             player.removePotionEffect(eff.getType());
@@ -103,41 +96,128 @@ public class BridgingAnalyzer extends JavaPlugin implements Listener {
     }
 
     public static void spawnVillager() {
-        for (Entity en : Bukkit.getWorld("world").getEntities())
-            if (en.getType() == EntityType.VILLAGER) if ("靶子".equals(en.getCustomName())) {
-                en.remove();
-            }
-        for (ArmorStand stand : Bukkit.getWorld("world").getEntitiesByClass(ArmorStand.class)) {
-            if (stand.getCustomName() == null) {
-                continue;
-            }
-            if (stand.getCustomName().contains("VillagerSpawnPoint")) {
-                Villager vi = (Villager) stand.getWorld().spawnEntity(stand.getLocation().add(0, 1, 0),
-                        EntityType.VILLAGER);
-                // Cross-version: SLOWNESS (1.14+) vs SLOW (1.12-1.8)
-                PotionEffectType slowType = PotionEffectType.getByName("SLOWNESS");
-                if (slowType == null) slowType = PotionEffectType.getByName("SLOW");
-                if (slowType != null) {
-                    vi.addPotionEffect(new PotionEffect(slowType, 32766, 254, false, false), true);
+        BridgingAnalyzer plugin = getInstance();
+        if (plugin == null) {
+            return;
+        }
+
+        for (World world : Bukkit.getWorlds()) {
+            for (ArmorStand stand : world.getEntitiesByClass(ArmorStand.class)) {
+                if (stand.getCustomName() == null || !stand.getCustomName().contains("VillagerSpawnPoint")) {
+                    continue;
                 }
-                vi.setProfession(Profession.LIBRARIAN);
-                vi.setMaxHealth(1);
-                vi.setHealth(1);
-                vi.setCustomName("靶子");
-                vi.setCustomNameVisible(false);
-                NoAIUtils.setAI(vi, false);
+                Location spawn = stand.getLocation().clone().add(0, 1, 0);
+                String spawnKey = plugin.getSpawnKey(spawn);
+                if (plugin.pendingTargetRespawns.contains(spawnKey)) {
+                    continue;
+                }
+                if (hasTargetNear(spawn)) {
+                    continue;
+                }
+                spawnTargetVillager(spawn);
             }
         }
     }
 
+    private static boolean hasTargetNear(Location location) {
+        for (Entity entity : location.getWorld().getNearbyEntities(location, 0.8, 1.5, 0.8)) {
+            if (isTargetVillager(entity)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static void configureTargetVillager(Villager villager) {
+        PotionEffectUtils.applyEffect(villager, new String[]{"SLOWNESS", "SLOW"}, 32766, 254);
+        villager.setProfession(Profession.LIBRARIAN);
+        PotionEffectUtils.setMaxHealth(villager, 1);
+        villager.setHealth(villager.getMaxHealth());
+        villager.setCustomName("靶子");
+        villager.setCustomNameVisible(false);
+        NoAIUtils.setAI(villager, false);
+    }
+
+    private static Villager spawnTargetVillager(Location location) {
+        Villager villager = (Villager) location.getWorld().spawnEntity(location, EntityType.VILLAGER);
+        configureTargetVillager(villager);
+        return villager;
+    }
+
+    private Location resolveTargetAnchor(Villager villager) {
+        Location best = null;
+        double bestDistance = Double.MAX_VALUE;
+        for (ArmorStand stand : villager.getWorld().getEntitiesByClass(ArmorStand.class)) {
+            if (stand.getCustomName() == null || !stand.getCustomName().contains("VillagerSpawnPoint")) {
+                continue;
+            }
+            Location spawn = stand.getLocation().clone().add(0, 1, 0);
+            double distance = spawn.distanceSquared(villager.getLocation());
+            if (distance < bestDistance) {
+                bestDistance = distance;
+                best = spawn;
+            }
+        }
+        return best != null ? best : villager.getLocation().clone();
+    }
+
+    private String getSpawnKey(Location location) {
+        if (location == null || location.getWorld() == null) {
+            return "unknown";
+        }
+        return location.getWorld().getName() + ':' + location.getBlockX() + ':' + location.getBlockY() + ':'
+                + location.getBlockZ();
+    }
+
+    private void scheduleTargetRespawn(Location anchor, Villager villager) {
+        if (anchor == null || anchor.getWorld() == null) {
+            if (villager != null && villager.isValid()) {
+                villager.remove();
+            }
+            return;
+        }
+
+        String spawnKey = getSpawnKey(anchor);
+        if (pendingTargetRespawns.contains(spawnKey)) {
+            if (villager != null && villager.isValid()) {
+                villager.remove();
+            }
+            return;
+        }
+
+        pendingTargetRespawns.add(spawnKey);
+        if (villager != null && villager.isValid()) {
+            Sound hurtSound = SoundMachine.get("VILLAGER_HIT", "ENTITY_VILLAGER_HURT");
+            if (hurtSound != null) {
+                villager.getWorld().playSound(villager.getLocation(), hurtSound, 1, 1);
+            }
+            villager.remove();
+        }
+
+        Bukkit.getScheduler().runTaskLater(this, () -> {
+            pendingTargetRespawns.remove(spawnKey);
+            if (anchor.getWorld() != null && !hasTargetNear(anchor)) {
+                spawnTargetVillager(anchor);
+            }
+        }, TARGET_RESPAWN_DELAY_TICKS);
+    }
+
     public static void teleportCheckPoint(Player p) {
+        if (!p.isOnline()) {
+            return;
+        }
+        Counter counter = getCounter(p);
+        counter.markTriggerBlockUsed();
         p.setFallDistance(0);
         clearInventory(p);
-        p.getInventory().addItem(blockSkinProvider.provide(p));
         p.setFoodLevel(20);
         p.setHealth(20);
-        p.setNoDamageTicks(10);
-        getCounter(p).teleportCheckPoint();
+        p.setNoDamageTicks(40);
+        boolean loadedChest = counter.teleportCheckPoint();
+        if (!loadedChest) {
+            p.getInventory().addItem(blockSkinProvider.provide(p));
+        }
+        counter.markTriggerBlockUsed();
         p.setGameMode(GameMode.SURVIVAL);
     }
 
@@ -147,7 +227,6 @@ public class BridgingAnalyzer extends JavaPlugin implements Listener {
     }
 
     public static boolean isPlacedByPlayer(Block b) {
-        // Fix: Use Material instead of MaterialData for 1.21 compatibility
         if (getPlacedBlocks().containsKey(b)) return getPlacedBlocks().get(b).equals(b.getType());
         return false;
     }
@@ -155,11 +234,12 @@ public class BridgingAnalyzer extends JavaPlugin implements Listener {
     @EventHandler
     public void antiArmorStandManipulate(PlayerArmorStandManipulateEvent e) {
         e.setCancelled(true);
-        if (e.getPlayer().getGameMode() == GameMode.CREATIVE && e.getPlayer().isOp())
-            if (e.getRightClicked().getCustomName().contains("VillagerSpawnPoint")) {
-                e.getRightClicked().remove();
-                TitleUtils.sendTitle(e.getPlayer(), "", "§a村民刷新点已移除", 10, 20, 10);
-            }
+        String standName = e.getRightClicked().getCustomName();
+        if (e.getPlayer().getGameMode() == GameMode.CREATIVE && e.getPlayer().isOp()
+                && standName != null && standName.contains("VillagerSpawnPoint")) {
+            e.getRightClicked().remove();
+            TitleUtils.sendTitle(e.getPlayer(), "", "§a村民刷新点已移除", 10, 20, 10);
+        }
     }
 
     @EventHandler
@@ -174,16 +254,18 @@ public class BridgingAnalyzer extends JavaPlugin implements Listener {
         e.setCancelled(true);
     }
 
-    @EventHandler
-    public void logoutBreak(PlayerQuitEvent e) {
-        Counter counter = getCounter(e.getPlayer());
-        // 停止计时（如果正在计时）
-        if (counter.isBridgeTimingActive()) {
-            counter.stopBridgeTiming();
+    private void handlePlayerDisconnect(Player player, String consoleSuffix) {
+        clearPermissionCache(player);
+        Counter counter = counters.remove(player);
+        if (counter != null) {
+            if (counter.isBridgeTimingActive()) {
+                counter.stopBridgeTiming();
+            }
+            counter.instantBreakBlock();
         }
-        // 清除玩家放置的方块
-        counter.instantBreakBlock();
-        Bukkit.getConsoleSender().sendMessage("§bBridgingAnalyzer §7>> §a玩家 " + e.getPlayer().getName() + " 离线, 已清除其放置的方块.");
+        if (consoleSuffix != null) {
+            Bukkit.getConsoleSender().sendMessage("§bBridgingAnalyzer §7>> §a玩家 " + player.getName() + consoleSuffix);
+        }
     }
 
     @EventHandler
@@ -193,18 +275,30 @@ public class BridgingAnalyzer extends JavaPlugin implements Listener {
 
     @EventHandler
     public void onDamage(EntityDamageEvent e) {
-        if (e.getEntity().getType() == EntityType.PLAYER) {
-            Counter c = BridgingAnalyzer.getCounter((Player) e.getEntity());
-            if (e.getFinalDamage() > 20) {
-                c.reset();
-                teleportCheckPoint((Player) e.getEntity());
-                TitleUtils.sendTitle((Player) e.getEntity(), "",
-                        "§4致命伤害 - " + Utils.formatDouble(e.getFinalDamage() / 2) + " ❤", 10, 20, 10);
-                e.setDamage(0.0);
-            } else if (e.getFinalDamage() > 10) {
-                TitleUtils.sendTitle((Player) e.getEntity(), "",
-                        "§c严重伤害 - " + Utils.formatDouble(e.getFinalDamage() / 2) + " ❤", 10, 20, 10);
-            }
+        if (e.getEntity().getType() != EntityType.PLAYER) {
+            return;
+        }
+
+        Player player = (Player) e.getEntity();
+        EntityDamageEvent.DamageCause cause = e.getCause();
+        if (cause == EntityDamageEvent.DamageCause.SUFFOCATION
+                || cause == EntityDamageEvent.DamageCause.CRAMMING) {
+            e.setDamage(0.0);
+            return;
+        }
+
+        Counter c = BridgingAnalyzer.getCounter(player);
+        if (e.getFinalDamage() > 20 && c.canUseTriggerBlock()) {
+            c.reset();
+            teleportCheckPoint(player);
+            TitleUtils.sendTitle(player, "",
+                    "§4致命伤害 - " + Utils.formatDouble(e.getFinalDamage() / 2) + " ❤", 10, 20, 10);
+            e.setDamage(0.0);
+        } else if (e.getFinalDamage() > 10) {
+            TitleUtils.sendTitle(player, "",
+                    "§c严重伤害 - " + Utils.formatDouble(e.getFinalDamage() / 2) + " ❤", 10, 20, 10);
+            e.setDamage(0.0);
+        } else {
             e.setDamage(0.0);
         }
     }
@@ -227,20 +321,18 @@ public class BridgingAnalyzer extends JavaPlugin implements Listener {
     public void onEnable() {
         instance = this;
 
-        // Display version and modification info
-        getLogger().info("§b§l=== BridgingAnalyzer v2.1.2 ===");
+        getLogger().info("§b§l=== BridgingAnalyzer v2.3.3 ===");
         getLogger().info("§aOriginal Author: SakuraKooi");
-        getLogger().info("§a1.21 Adaptation: Ver_zhzh");
-        getLogger().info("§eMulti-Version Compatible (1.8.8-1.21)");
-        getLogger().info("§6New Feature: Bridge Timing System");
+        getLogger().info("§aAdaptation: Ver_zhzh");
+        getLogger().info("§eUniversal Jar: 1.8.8 - 26.x+");
+        getLogger().info("§6Detected: " + sakura.kooi.BridgingAnalyzer.api.ServerVersion.current().getDisplayVersion());
+        getLogger().info("§6Features: Bridge Timing / Multi-Version");
         getLogger().info("§b§l==============================");
 
-        // Initialize version manager first
         try {
             sakura.kooi.BridgingAnalyzer.api.VersionManager.initialize();
-            getLogger().info("§aVersion adapter loaded successfully!");
+            getLogger().info("§aUniversal adapter loaded successfully!");
 
-            // Initialize particle manager with the loaded adapter
             sakura.kooi.BridgingAnalyzer.utils.ParticleManager.getInstance()
                 .initialize(sakura.kooi.BridgingAnalyzer.api.VersionManager.getAdapter());
             getLogger().info("§aParticle manager initialized successfully!");
@@ -259,8 +351,6 @@ public class BridgingAnalyzer extends JavaPlugin implements Listener {
         pluginManager.registerEvents(new CounterListener(), this);
         pluginManager.registerEvents(new HighlightListener(), this);
         pluginManager.registerEvents(new TriggerBlockListener(), this);
-        // 资源包
-        // pluginManager.registerEvents(new ResourcePackLoader(), this);
         getCommand("bridge").setExecutor(new BridgeCommand());
         getCommand("clearblock").setExecutor(new ClearCommand());
         getCommand("bsaveworld").setExecutor(new SaveWorldCommand());
@@ -272,23 +362,29 @@ public class BridgingAnalyzer extends JavaPlugin implements Listener {
             spawnVillager();
         }, 300, 300);
 
-        // 搭路记时功能：智能更新ActionBar显示（集成到CPS显示中）
+        // ActionBar: 2-tick loop; CPS/distance every 4 ticks, bridge timer every 2 ticks
         Bukkit.getScheduler().runTaskTimer(this, () -> {
+            actionBarTick++;
             for (Player player : Bukkit.getOnlinePlayers()) {
                 Counter counter = getCounter(player);
-                if (counter.isSpeedCountEnabled()) {
-                    // 构建ActionBar消息，包含计时信息
-                    String message = "§c§l最大CPS - " + counter.getMaxCPS() + " §d§l当前CPS - " + counter.getCPS() + " §a§l| §c§l最远距离 - " + counter.getMaxBridgeLength() + " §d§l当前距离 - " + counter.getBridgeLength();
-
-                    // 如果启用了计时功能且正在计时，添加计时信息
-                    if (counter.isBridgeTimingEnabled() && counter.isBridgeTimingActive()) {
-                        message += " §6§l| §a§lTime §f- §e§l" + counter.formatBridgeTime();
-                    }
-
-                    sakura.kooi.BridgingAnalyzer.utils.ActionBarUtils.sendActionBar(player, message);
+                if (!counter.isSpeedCountEnabled()) {
+                    continue;
                 }
+                boolean timingActive = counter.isBridgeTimingEnabled() && counter.isBridgeTimingActive();
+                if (!timingActive && actionBarTick % 2 != 0) {
+                    continue;
+                }
+
+                String message = "§c§l最大CPS - " + counter.getMaxCPS() + " §d§l当前CPS - " + counter.getCPS()
+                        + " §a§l| §c§l最远距离 - " + counter.getMaxBridgeLength() + " §d§l当前距离 - "
+                        + counter.getBridgeLength();
+                if (timingActive) {
+                    message += " §6§l| §a§lTime §f- §e§l" + counter.formatBridgeTime();
+                }
+
+                sakura.kooi.BridgingAnalyzer.utils.ActionBarUtils.sendActionBar(player, message);
             }
-        }, 0, 2); // 每2tick(0.1秒)更新一次，实现流畅显示（已优化缓存减少性能开销）
+        }, 0, 2);
 
 
 
@@ -303,35 +399,42 @@ public class BridgingAnalyzer extends JavaPlugin implements Listener {
                 "§bBridgingAnalyzer §7>> §e使用 §a/genvillager §e可在站立位置创建村民刷新点",
                 "§bBridgingAnalyzer §7>> §c掉入虚空会自动回到 §a传送点 §c并重置地图",
                 "§bBridgingAnalyzer §7>> §c注意: 创造模式放置的方块不会被重置, 请在生存模式下练习",
-                "§bBridgingAnalyzer §7>> §cPaperSPigot 1.21已适配: made by Ver_zhzh    : ",
+                "§bBridgingAnalyzer §7>> §a通用单Jar已启用: 支持 1.8.8 - 26.x+",
                 "§bBridgingAnalyzer §7>> §f----------------------------------------------------------------"
         });
     }
 
     @EventHandler
     public void onJoin(PlayerJoinEvent e) {
-        e.getPlayer().sendMessage(new String[]{
+        Player player = e.getPlayer();
+        player.sendMessage(new String[]{
                 "§b§l搭路练习 §7>> §e输入 §6/bridge §e更改练习参数",
                 "§b§l搭路练习 §7>> §6Bilibili @SakuraKooi"
         });
-        // Performance optimization: use cached permission check
-        if (hasNoClearPermission(e.getPlayer())) return;
-        teleportCheckPoint(e.getPlayer());
+        if (hasNoClearPermission(player)) {
+            return;
+        }
+        Bukkit.getScheduler().runTaskLater(this, () -> {
+            if (!player.isOnline()) {
+                return;
+            }
+            Counter counter = getCounter(player);
+            counter.setCheckPoint(Counter.createSpawnCheckPoint(player.getWorld()));
+            counter.markTriggerBlockUsed();
+            teleportCheckPoint(player);
+        }, 5L);
     }
 
     @EventHandler
     public void onDropItem(PlayerDropItemEvent e) {
-        // Performance optimization: use cached permission check
         if (hasNoClearPermission(e.getPlayer())) return;
 
-        // Use version adapter for cross-version material compatibility
         Material goldenPickaxe = sakura.kooi.BridgingAnalyzer.api.VersionManager.getAdapter().getMaterial(sakura.kooi.BridgingAnalyzer.api.VersionAdapter.Materials.GOLDEN_PICKAXE);
         if (goldenPickaxe == null) {
-            // Fallback for older versions
             try {
                 goldenPickaxe = Material.valueOf("GOLD_PICKAXE");
             } catch (IllegalArgumentException ex) {
-                goldenPickaxe = Material.valueOf("GOLDEN_PICKAXE"); // Modern fallback
+                goldenPickaxe = Material.valueOf("GOLDEN_PICKAXE");
             }
         }
 
@@ -342,36 +445,37 @@ public class BridgingAnalyzer extends JavaPlugin implements Listener {
 
     @EventHandler
     public void onPlayerQuit(PlayerQuitEvent e) {
-        // Clean up permission cache when player leaves
-        clearPermissionCache(e.getPlayer());
-        // Clean up counter data - ensure blocks are cleared before removing counter
-        Counter counter = counters.get(e.getPlayer());
-        if (counter != null) {
-            // 停止计时（如果正在计时）
-            if (counter.isBridgeTimingActive()) {
-                counter.stopBridgeTiming();
-            }
-            // 确保方块被清除
-            counter.instantBreakBlock();
-        }
-        counters.remove(e.getPlayer());
+        handlePlayerDisconnect(e.getPlayer(), " 离线, 已清除其放置的方块.");
     }
 
     @EventHandler
     public void onPlayerKick(PlayerKickEvent e) {
-        // 处理玩家被踢出的情况，与退出处理相同
-        Counter counter = getCounter(e.getPlayer());
-        // 停止计时（如果正在计时）
-        if (counter.isBridgeTimingActive()) {
-            counter.stopBridgeTiming();
+        handlePlayerDisconnect(e.getPlayer(), " 被踢出, 已清除其放置的方块.");
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    public void onTargetVillagerDamage(EntityDamageEvent e) {
+        if (!(e.getEntity() instanceof Villager)) {
+            return;
         }
-        // 清除玩家放置的方块
-        counter.instantBreakBlock();
-        // 清理权限缓存
-        clearPermissionCache(e.getPlayer());
-        // 清理Counter数据
-        counters.remove(e.getPlayer());
-        Bukkit.getConsoleSender().sendMessage("§bBridgingAnalyzer §7>> §a玩家 " + e.getPlayer().getName() + " 被踢出, 已清除其放置的方块.");
+        Villager villager = (Villager) e.getEntity();
+        if (!isTargetVillager(villager)) {
+            return;
+        }
+
+        if (villager.getHealth() - e.getFinalDamage() > 0) {
+            return;
+        }
+
+        e.setCancelled(true);
+        scheduleTargetRespawn(resolveTargetAnchor(villager), villager);
+    }
+
+    private static boolean isTargetVillager(Entity entity) {
+        if (!(entity instanceof Villager)) {
+            return false;
+        }
+        return "靶子".equals(entity.getCustomName());
     }
 
     @EventHandler

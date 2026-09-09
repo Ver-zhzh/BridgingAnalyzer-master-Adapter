@@ -5,10 +5,13 @@ import lombok.Setter;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
+import org.bukkit.block.BlockState;
 import org.bukkit.block.Chest;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitTask;
 import sakura.kooi.BridgingAnalyzer.utils.SoundMachine;
@@ -27,8 +30,10 @@ public class Counter {
     private int maxLength = 0;
     private ArrayList<Block> allBlock = new ArrayList<>();
     private Block lastBlock;
-    private Location checkPoint = Bukkit.getWorld("world").getSpawnLocation().add(0.5, 1, 0.5);
+    private static final long TRIGGER_COOLDOWN_MS = 3000L;
+    private Location checkPoint;
     private Player player;
+    private long triggerBlockCooldownUntil = 0L;
     @Getter
     @Setter
     private boolean speedCountEnabled = true;
@@ -47,16 +52,47 @@ public class Counter {
     private long bridgeStartTime = 0;
     private long bridgeEndTime = 0;
     private boolean isBridgeTimingActive = false;
-    // 缓存格式化的时间字符串，避免重复计算
+    // Cached formatted bridge time string
     private String cachedFormattedTime = "00:00.000";
     private long lastFormattedTimeMs = 0;
     public Counter(Player p) {
         player = p;
+        checkPoint = createSpawnCheckPoint(p.getWorld());
+    }
+
+    public static Location createSpawnCheckPoint(World world) {
+        Location spawn = world.getSpawnLocation().clone();
+        return createCheckpointLocation(spawn);
+    }
+
+    /** Checkpoint on the block below feet (same rule as emerald trigger). */
+    public static Location createCheckpointLocation(Location playerLocation) {
+        Block standOn = getStandOnBlock(playerLocation);
+        Location checkpoint = standOn.getLocation().add(0.5D, 1.0D, 0.5D);
+        checkpoint.setYaw(playerLocation.getYaw());
+        checkpoint.setPitch(playerLocation.getPitch());
+        return checkpoint;
+    }
+
+    private static Block getStandOnBlock(Location location) {
+        Block feetBlock = location.getBlock();
+        Block standOn = feetBlock.getRelative(BlockFace.DOWN);
+        if (standOn.getType() != Material.AIR) {
+            return standOn;
+        }
+        return location.clone().add(0, -1, 0).getBlock();
+    }
+
+    public boolean canUseTriggerBlock() {
+        return System.currentTimeMillis() >= triggerBlockCooldownUntil;
+    }
+
+    public void markTriggerBlockUsed() {
+        triggerBlockCooldownUntil = System.currentTimeMillis() + TRIGGER_COOLDOWN_MS;
     }
 
     public void addLogBlock(Block block) {
         allBlock.add(block);
-        // Fix: Use Material instead of MaterialData for 1.21 compatibility
         BridgingAnalyzer.getPlacedBlocks().put(block, block.getType());
     }
 
@@ -68,7 +104,6 @@ public class Counter {
 
     public void countBridge(Block block) {
         allBlock.add(block);
-        // Fix: Use Material instead of MaterialData for 1.21 compatibility
         BridgingAnalyzer.getPlacedBlocks().put(block, block.getType());
         if ((lastBlock != null) && ((lastBlock.getY() + 1) != block.getY())) {
             counterBridge.add(System.currentTimeMillis());
@@ -177,36 +212,84 @@ public class Counter {
     }
 
     public void setCheckPoint(Location loc) {
-        checkPoint = loc;
-        resetBridgeTiming(); // 设置新复活点时重置计时
-        Block target = loc.add(0, -1, 0).getBlock().getRelative(BlockFace.DOWN, 3);
-        if (target.getType() == Material.CHEST) {
-            BridgingAnalyzer.clearInventory(player);
-            Chest chest = (Chest) target.getState();
-            for (ItemStack stack : chest.getBlockInventory().getContents())
-                if (stack != null) {
-                    Utils.addItem(player.getInventory(), stack.clone());
-                }
-            player.getWorld().playSound(player.getLocation(), SoundMachine.get("ITEM_PICKUP", "ENTITY_ITEM_PICKUP"), 1,
-                    1);
-        }
-
+        checkPoint = loc.clone();
+        resetBridgeTiming();
+        loadChestItemsBelowCheckpoint();
     }
 
-    public void teleportCheckPoint() {
-        player.teleport(checkPoint);
-        Block target = checkPoint.getBlock().getRelative(BlockFace.DOWN, 3);
-        if (target.getType() == Material.CHEST) {
-            BridgingAnalyzer.clearInventory(player);
-            Chest chest = (Chest) target.getState();
-            for (ItemStack stack : chest.getBlockInventory().getContents())
-                if (stack != null) {
-                    Utils.addItem(player.getInventory(), stack.clone());
-                }
-            player.getWorld().playSound(player.getLocation(), SoundMachine.get("ITEM_PICKUP", "ENTITY_ITEM_PICKUP"), 1,
-                    1);
+    public boolean teleportCheckPoint() {
+        if (!player.isOnline()) {
+            return false;
+        }
+        player.teleport(checkPoint.clone());
+        return loadChestItemsBelowCheckpoint();
+    }
+
+    private boolean loadChestItemsBelowCheckpoint() {
+        Block chestBlock = findLinkedChestBlock();
+        if (chestBlock == null) {
+            return false;
         }
 
+        if (!chestBlock.getChunk().isLoaded()) {
+            chestBlock.getChunk().load();
+        }
+
+        BlockState state = chestBlock.getState();
+        if (!(state instanceof Chest)) {
+            return false;
+        }
+
+        Chest chest = (Chest) state;
+        ItemStack[] contents = chest.getBlockInventory().getContents();
+        if (!hasInventoryItems(contents)) {
+            contents = chest.getInventory().getContents();
+        }
+        if (!hasInventoryItems(contents)) {
+            return false;
+        }
+
+        BridgingAnalyzer.clearInventory(player);
+        for (ItemStack stack : contents) {
+            if (stack != null && stack.getType() != Material.AIR) {
+                Utils.addItem(player.getInventory(), stack.clone());
+            }
+        }
+        player.getWorld().playSound(player.getLocation(), SoundMachine.get("ITEM_PICKUP", "ENTITY_ITEM_PICKUP"), 1, 1);
+        return true;
+    }
+
+    private static boolean hasInventoryItems(ItemStack[] contents) {
+        if (contents == null) {
+            return false;
+        }
+        for (ItemStack stack : contents) {
+            if (stack != null && stack.getType() != Material.AIR) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /** Chest is two blocks below the emerald stand-on block. */
+    private Block findLinkedChestBlock() {
+        if (checkPoint == null) {
+            return null;
+        }
+        Block standOn = getStandOnBlock(checkPoint);
+        if (standOn.getType() == Material.AIR) {
+            return null;
+        }
+        Block target = standOn.getRelative(BlockFace.DOWN, 2);
+        return isChestMaterial(target.getType()) ? target : null;
+    }
+
+    private static boolean isChestMaterial(Material material) {
+        if (material == null || material == Material.AIR) {
+            return false;
+        }
+        String name = material.name();
+        return "CHEST".equals(name) || "TRAPPED_CHEST".equals(name);
     }
 
     public void vectoryBreakBlock() {
@@ -221,12 +304,6 @@ public class Counter {
         breakBlock();
     }
 
-    // ===== 搭路记时功能 =====
-
-    /**
-     * 开始搭路计时
-     * 只有在启用计时功能且当前未在计时时才会开始计时
-     */
     public void startBridgeTiming() {
         if (bridgeTimingEnabled && !isBridgeTimingActive) {
             bridgeStartTime = System.currentTimeMillis();
@@ -235,10 +312,6 @@ public class Counter {
         }
     }
 
-    /**
-     * 停止搭路计时
-     * 记录结束时间并设置计时状态为非活跃
-     */
     public void stopBridgeTiming() {
         if (isBridgeTimingActive) {
             bridgeEndTime = System.currentTimeMillis();
@@ -246,23 +319,14 @@ public class Counter {
         }
     }
 
-    /**
-     * 重置搭路计时
-     * 清除所有计时数据并停止当前计时
-     */
     public void resetBridgeTiming() {
         bridgeStartTime = 0;
         bridgeEndTime = 0;
         isBridgeTimingActive = false;
-        // 清除缓存
         cachedFormattedTime = "00:00.000";
         lastFormattedTimeMs = 0;
     }
 
-    /**
-     * 获取当前搭路时间（毫秒）
-     * @return 如果正在计时返回当前经过时间，如果已结束返回总时间，否则返回0
-     */
     public long getBridgeTime() {
         if (!bridgeTimingEnabled) return 0;
         if (isBridgeTimingActive && bridgeStartTime > 0) {
@@ -273,27 +337,19 @@ public class Counter {
         return 0;
     }
 
-    /**
-     * 格式化搭路时间为可读字符串（修复进位问题）
-     * @return 格式化的时间字符串 (mm:ss.SSS)
-     */
     public String formatBridgeTime() {
         long timeMs = getBridgeTime();
         if (timeMs <= 0) return "00:00.000";
 
-        // 为了确保显示准确性，我们减少缓存的使用，只在时间完全相同时才使用缓存
-        // 这样可以避免因为缓存导致的显示跳跃问题
         if (timeMs == lastFormattedTimeMs && cachedFormattedTime != null) {
             return cachedFormattedTime;
         }
 
-        // 使用更精确的计算方式
         long totalSeconds = timeMs / 1000;
         long minutes = totalSeconds / 60;
         long seconds = totalSeconds % 60;
         long milliseconds = timeMs % 1000;
 
-        // 确保所有值都在正确范围内
         minutes = Math.max(0, Math.min(99, minutes));
         seconds = Math.max(0, Math.min(59, seconds));
         milliseconds = Math.max(0, Math.min(999, milliseconds));
@@ -303,10 +359,6 @@ public class Counter {
         return cachedFormattedTime;
     }
 
-    /**
-     * 检查是否正在进行搭路计时
-     * @return true如果正在计时，false否则
-     */
     public boolean isBridgeTimingActive() {
         return isBridgeTimingActive;
     }
@@ -329,15 +381,13 @@ public class Counter {
         @Override
         public void run() {
             if (!blocks.isEmpty()) {
-                // Performance optimization: process multiple blocks per tick for better efficiency
-                int blocksPerTick = Math.min(3, blocks.size()); // Process up to 3 blocks per tick
+                int blocksPerTick = Math.min(3, blocks.size());
 
                 for (int i = 0; i < blocksPerTick && !blocks.isEmpty(); i++) {
-                    Block b = blocks.remove(0); // More efficient than get(0) + remove(0)
+                    Block b = blocks.remove(0);
                     scheduledBreakBlocks.remove(b);
                     BridgingAnalyzer.getPlacedBlocks().remove(b);
 
-                    // Only break non-air blocks
                     if (b.getType() != Material.AIR) {
                         Utils.breakBlock(b);
                     }
